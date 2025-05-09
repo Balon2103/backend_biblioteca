@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Solicitar Préstamo</h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h3>{{ libro.titulo }}</h3>
+                    <p><strong>Autor:</strong> {{ libro.autor }}</p>
+                    <p><strong>Editorial:</strong> {{ libro.editorial }}</p>
+                </div>
+            </div>
+
+            <form method="POST">
+                <div class="alert alert-info">
+                    <p>Al solicitar el préstamo, aceptas las siguientes condiciones:</p>
+                    <ul>
+                        <li>El préstamo tiene una duración de 15 días.</li>
+                        <li>Debes devolver el libro en buen estado.</li>
+                        <li>En caso de retraso, se aplicarán las sanciones correspondientes.</li>
+                    </ul>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">Confirmar Préstamo</button>
+                    <a href="{{ url_for('ficha_bibliografica', id=libro.id) }}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

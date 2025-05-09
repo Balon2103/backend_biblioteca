@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Mis Préstamos</h2>
+
+    <!-- Préstamos Activos -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Préstamos Activos</h4>
+        </div>
+        <div class="card-body">
+            {% if prestamos_activos %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Libro</th>
+                            <th>Fecha Préstamo</th>
+                            <th>Fecha Devolución Esperada</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prestamo in prestamos_activos %}
+                        <tr>
+                            <td>{{ prestamo.libro.titulo }}</td>
+                            <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ prestamo.fecha_devolucion_esperada.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                {% if now > prestamo.fecha_devolucion_esperada %}
+                                <span class="badge bg-danger">Vencido</span>
+                                {% else %}
+                                <span class="badge bg-success">Activo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('admin_devolver_libro', prestamo_id=prestamo.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Está seguro de marcar este libro como devuelto?')">
+                                        <i class="fas fa-check"></i> Devolver
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center">No tienes préstamos activos en este momento.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Historial de Préstamos -->
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="mb-0">Historial de Préstamos</h4>
+        </div>
+        <div class="card-body">
+            {% if historial %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Libro</th>
+                            <th>Fecha Préstamo</th>
+                            <th>Fecha Devolución</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prestamo in historial %}
+                        <tr>
+                            <td>{{ prestamo.libro.titulo }}</td>
+                            <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ prestamo.fecha_devolucion_real.strftime('%d/%m/%Y') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center">No tienes historial de préstamos.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

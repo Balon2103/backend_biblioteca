@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>Ficha Bibliográfica</h2>
+            <a href="{{ url_for('ficha_bibliografica_pdf', id=libro.id) }}" class="btn btn-primary">
+                <i class="fas fa-download"></i> Descargar PDF
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3 class="mb-4">{{ libro.titulo }}</h3>
+                    
+                    <table class="table">
+                        <tr>
+                            <th style="width: 200px;">Autor:</th>
+                            <td>{{ libro.autor }}</td>
+                        </tr>
+                        <tr>
+                            <th>Editorial:</th>
+                            <td>{{ libro.editorial }}</td>
+                        </tr>
+                        <tr>
+                            <th>Ciudad:</th>
+                            <td>{{ libro.ciudad }}</td>
+                        </tr>
+                        <tr>
+                            <th>Año de Edición:</th>
+                            <td>{{ libro.anio_edicion }}</td>
+                        </tr>
+                        <tr>
+                            <th>Colección:</th>
+                            <td>{{ libro.coleccion }}</td>
+                        </tr>
+                        <tr>
+                            <th>Número de Páginas:</th>
+                            <td>{{ libro.num_paginas }}</td>
+                        </tr>
+                        <tr>
+                            <th>Medidas:</th>
+                            <td>{{ libro.medidas }}</td>
+                        </tr>
+                        <tr>
+                            <th>Características del Formato:</th>
+                            <td>{{ libro.caract_formato }}</td>
+                        </tr>
+                        <tr>
+                            <th>Cantidad de Ejemplares:</th>
+                            <td>{{ libro.cant_ejemplares }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tomos:</th>
+                            <td>{{ libro.tomos }}</td>
+                        </tr>
+                        <tr>
+                            <th>Cota:</th>
+                            <td>{{ libro.cota }}</td>
+                        </tr>
+                        <tr>
+                            <th>Verificación:</th>
+                            <td>{{ libro.verificacion }}</td>
+                        </tr>
+                        <tr>
+                            <th>Materias:</th>
+                            <td>{{ libro.materias }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            {% if session.get('user_id') %}
+            <div class="mt-4">
+                <a href="{{ url_for('nuevo_prestamo', libro_id=libro.id) }}" class="btn btn-success">
+                    <i class="fas fa-book"></i> Solicitar Préstamo
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

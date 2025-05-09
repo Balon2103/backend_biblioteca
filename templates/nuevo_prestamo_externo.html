@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Registrar Préstamo</h2>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label>Nombre *</label>
+                <input type="text" name="nombre" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Apellido *</label>
+                <input type="text" name="apellido" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Cédula o DNI *</label>
+                <input type="text" name="cedula" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Dirección *</label>
+                <input type="text" name="direccion" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Teléfono *</label>
+                <input type="text" name="telefono" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Correo electrónico *</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Fecha de préstamo</label>
+                <input type="text" class="form-control" value="{{ fecha_prestamo.strftime('%Y-%m-%d') }}" readonly>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Fecha estimada de devolución *</label>
+                <input type="date" name="fecha_devolucion" class="form-control" value="{{ fecha_devolucion.strftime('%Y-%m-%d') }}" required>
+            </div>
+            <div class="col-12 mb-3">
+                <label>Observaciones</label>
+                <textarea name="observaciones" class="form-control"></textarea>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Registrar Préstamo</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %} 

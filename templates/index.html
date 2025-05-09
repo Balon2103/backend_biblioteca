@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold text-primary">Catálogo de Libros</h1>
+            <p class="text-muted">Explora nuestra colección de libros disponibles</p>
+        </div>
+        <div class="col-md-4">
+            <form action="{{ url_for('index') }}" method="GET" class="d-flex">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por título, autor o materia..." value="{{ query }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    {% if query %}
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filtro de materias -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-filter text-primary me-2"></i>
+                            Filtrar por Materia
+                        </h5>
+                        {% if query %}
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-times me-1"></i> Limpiar filtros
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for materia in materias %}
+                        <a href="{{ url_for('index', q=materia) }}" 
+                           class="btn btn-outline-primary btn-sm {% if query == materia %}active{% endif %}">
+                            {{ materia }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de libros -->
+    <div class="row">
+        {% for libro in libros.items %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm hover-shadow">
+                <div class="card-body">
+                    <h5 class="card-title text-truncate" title="{{ formatear_valor(libro.titulo) }}">
+                        {{ formatear_valor(libro.titulo) }}
+                    </h5>
+                    <h6 class="card-subtitle mb-3 text-muted text-truncate" title="{{ formatear_valor(libro.autor) }}">
+                        {{ formatear_valor(libro.autor) }}
+                    </h6>
+                    <div class="card-text">
+                        <p class="mb-2">
+                            <i class="fas fa-building text-primary me-2"></i>
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ formatear_valor(libro.editorial) }}">
+                                {{ formatear_valor(libro.editorial) }}
+                            </span>
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-calendar text-primary me-2"></i>
+                            {{ formatear_valor(libro.anio_edicion) }}
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-barcode text-primary me-2"></i>
+                            {{ formatear_valor(libro.cota) }}
+                        </p>
+                        {% if libro.materias %}
+                        <p class="mb-3">
+                            <i class="fas fa-tags text-primary me-2"></i>
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ formatear_valor(libro.materias) }}">
+                                {{ formatear_valor(libro.materias) }}
+                            </span>
+                        </p>
+                        {% endif %}
+                        <p class="mb-3">
+                            <i class="fas fa-book text-primary me-2"></i>
+                            <span class="badge {% if libro.disponible %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if libro.disponible %}
+                                    <i class="fas fa-check-circle me-1"></i> Disponible
+                                {% else %}
+                                    <i class="fas fa-times-circle me-1"></i> No Disponible
+                                {% endif %}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('detalle_libro', id=libro.id) }}" class="btn btn-primary flex-grow-1">
+                            <i class="fas fa-info-circle me-1"></i> Ver detalles
+                        </a>
+                        {% if libro.disponible and session.get('user_id') %}
+                        <a href="{{ url_for('nuevo_prestamo_externo', libro_id=libro.id) }}" class="btn btn-success">
+                            <i class="fas fa-hand-holding-heart me-1"></i> Prestar
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info shadow-sm">
+                <i class="fas fa-info-circle me-2"></i>
+                No se encontraron libros que coincidan con tu búsqueda.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación dinámica -->
+    {% if libros.pages > 1 %}
+    <div class="d-flex justify-content-center mt-4">
+        <nav aria-label="Navegación de páginas" class="pagination-container">
+            <ul class="pagination pagination-sm mb-0">
+                {# Botón Anterior #}
+                {% if libros.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('index', page=libros.prev_num, q=query) }}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                </li>
+                {% endif %}
+
+                {# Ventana dinámica de páginas #}
+                {% set max_visible = 10 %}
+                {% set half_window = max_visible // 2 %}
+                {% set start_page = libros.page - half_window if libros.page - half_window > 0 else 1 %}
+                {% set end_page = start_page + max_visible - 1 if start_page + max_visible - 1 < libros.pages else libros.pages %}
+                {% if end_page - start_page < max_visible - 1 %}
+                    {% set start_page = end_page - max_visible + 1 if end_page - max_visible + 1 > 0 else 1 %}
+                {% endif %}
+                {% for page_num in range(start_page, end_page + 1) %}
+                <li class="page-item {% if page_num == libros.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('index', page=page_num, q=query) }}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+
+                {# Botón Siguiente #}
+                {% if libros.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('index', page=libros.next_num, q=query) }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    transition: all .3s ease;
+}
+.card {
+    transition: all .3s ease;
+}
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.pagination {
+    margin-bottom: 0;
+}
+.pagination .page-link {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+.pagination-container {
+    display: inline-block;
+    background: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+</style>
+{% endblock %} 
