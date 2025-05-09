@@ -2,20 +2,20 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from app.config.config import config
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'tu_clave_secreta_aqui'
-
-db = SQLAlchemy(app)
+db = SQLAlchemy()  # ❗️ Solo se instancia, no se pasa ningún app aquí
 
 def create_app(config_name='default'):
-    # Cargar configuración
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = 'tu_clave_secreta_aqui'
+
+    # Aplicar configuración adicional
     app.config.from_object(config[config_name])
-    
-    # Inicializar extensiones
+
+    # Inicializar SQLAlchemy con la app
     db.init_app(app)
-    
+
     # Registrar blueprints
     from app.routes.main import main as main_blueprint
     from app.routes.auth import auth as auth_blueprint
@@ -24,14 +24,14 @@ def create_app(config_name='default'):
     app.register_blueprint(main_blueprint)
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
     app.register_blueprint(admin_blueprint, url_prefix='/admin')
-    
+
     # Registrar context processors
     from app.utils.helpers import formatear_valor
     app.context_processor(lambda: dict(formatear_valor=formatear_valor))
-    
+
     # Crear tablas de la base de datos
     with app.app_context():
         db.create_all()
         print("Base de datos inicializada correctamente")
-    
-    return app 
+
+    return app
