@@ -10,9 +10,11 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from sqlalchemy import or_
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'tu_clave_secreta_aqui'  # Cambiar en producción
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
+app = Flask(__name__, 
+            template_folder='templates',
+            static_folder='static')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'tu_clave_secreta_aqui')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'tu_url_de_base_de_datos')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Inicializar la base de datos
