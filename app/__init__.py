@@ -1,14 +1,25 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from app.config.config import config
+import os
 
-db = SQLAlchemy()  # ❗️ Solo se instancia, no se pasa ningún app aquí
+db = SQLAlchemy()
 
 def create_app(config_name='default'):
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
+    app = Flask(__name__, 
+                static_folder='static',
+                template_folder='templates')
+    
+    # Configuración de la base de datos
+    if 'RENDER' in os.environ:
+        # En producción (Render.com)
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///biblioteca.db')
+    else:
+        # En desarrollo local
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
+    
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = 'tu_clave_secreta_aqui'
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'tu_clave_secreta_aqui')
 
     # Aplicar configuración adicional
     app.config.from_object(config[config_name])
@@ -38,6 +49,23 @@ def create_app(config_name='default'):
         
         # Crear tablas de la base de datos
         db.create_all()
+        
+        # Crear usuario administrador si no existe
+        admin = Usuario.query.filter_by(username='admin').first()
+        if not admin:
+            admin = Usuario(
+                username='admin',
+                email='admin@example.com',
+                nombre='Administrador',
+                apellido='Sistema',
+                cedula='0000000000',
+                is_admin=True
+            )
+            admin.set_password('admin123')
+            db.session.add(admin)
+            db.session.commit()
+            print("Usuario administrador creado")
+        
         print("Base de datos inicializada correctamente")
 
     return app

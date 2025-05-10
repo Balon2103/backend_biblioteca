@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from app import db
 from app.models.usuario import Usuario
 from app.utils.decorators import login_required
+import logging
 
 auth = Blueprint('auth', __name__)
 
@@ -11,21 +12,25 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        print(f"Intento de inicio de sesión - Usuario: {username}")  # Debug
+        logging.info(f"Intento de inicio de sesión - Usuario: {username}")
+        
+        if not username or not password:
+            flash('Por favor ingrese usuario y contraseña', 'danger')
+            return render_template('auth/login.html')
         
         user = Usuario.query.filter_by(username=username).first()
         if user:
-            print(f"Usuario encontrado: {user.username}")  # Debug
+            logging.info(f"Usuario encontrado: {user.username}")
             if user.check_password(password):
-                print("Contraseña correcta")  # Debug
+                logging.info("Contraseña correcta")
                 session['user_id'] = user.id
                 session['is_admin'] = user.is_admin
                 flash('Inicio de sesión exitoso', 'success')
                 return redirect(url_for('admin.index'))
             else:
-                print("Contraseña incorrecta")  # Debug
+                logging.warning("Contraseña incorrecta")
         else:
-            print("Usuario no encontrado")  # Debug
+            logging.warning("Usuario no encontrado")
         
         flash('Usuario o contraseña incorrectos', 'danger')
     return render_template('auth/login.html')
@@ -41,6 +46,10 @@ def registro():
         apellido = request.form.get('apellido')
         cedula = request.form.get('cedula')
         telefono = request.form.get('telefono')
+        
+        if not all([username, email, password, confirm_password, nombre, apellido, cedula]):
+            flash('Por favor complete todos los campos obligatorios', 'danger')
+            return redirect(url_for('auth.registro'))
         
         if password != confirm_password:
             flash('Las contraseñas no coinciden', 'danger')
@@ -58,20 +67,26 @@ def registro():
             flash('La cédula ya está registrada', 'danger')
             return redirect(url_for('auth.registro'))
         
-        user = Usuario(
-            username=username,
-            email=email,
-            nombre=nombre,
-            apellido=apellido,
-            cedula=cedula,
-            telefono=telefono
-        )
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
-        
-        flash('Registro exitoso. Por favor inicie sesión.', 'success')
-        return redirect(url_for('auth.login'))
+        try:
+            user = Usuario(
+                username=username,
+                email=email,
+                nombre=nombre,
+                apellido=apellido,
+                cedula=cedula,
+                telefono=telefono
+            )
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            
+            flash('Registro exitoso. Por favor inicie sesión.', 'success')
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error en el registro: {str(e)}")
+            flash('Error al registrar usuario. Por favor intente nuevamente.', 'danger')
+            return redirect(url_for('auth.registro'))
     
     return render_template('auth/registro.html')
 
