@@ -35,11 +35,29 @@ ENV/
 *.db
 *.sqlite3
 
-# Environment variables
-.env
-
 # Logs
 *.log
+
+# Local development settings
+.env
+.env.local
+
+# Pero NO ignorar estos archivos importantes
+!app/templates/
+!templates/
+!app/static/
+!static/
+!requirements.txt
+!run.py
+!app/__init__.py
+!app/models/
+!app/routes/
+!app/config/
+!app/utils/
+!app/controllers/
+
+# Environment variables
+.env
 
 # OS
 .DS_Store
