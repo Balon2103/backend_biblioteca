@@ -1,0 +1,6 @@
+titulo,autor,cota,editorial,anio_edicion,ciudad,coleccion,medidas,num_paginas,caract_formato,cant_ejemplares,tomos,verificacion,materias
+"Don Quijote de la Mancha","Miguel de Cervantes","CERV-001","Editorial Planeta",2015,"Madrid","Clásicos",23,863,"Tapa dura",2,"1","ISBN-001","Literatura española"
+"Cien años de soledad","Gabriel García Márquez","GARC-001","Editorial Sudamericana",2017,"Buenos Aires","Realismo mágico",21,471,"Tapa blanda",3,"1","ISBN-002","Literatura latinoamericana"
+"El Principito","Antoine de Saint-Exupéry","SAIN-001","Editorial Salamandra",2016,"Barcelona","Infantil",20,112,"Tapa dura",5,"1","ISBN-003","Literatura infantil"
+"1984","George Orwell","ORWE-001","Editorial Debolsillo",2018,"Madrid","Ciencia ficción",19,326,"Tapa blanda",2,"1","ISBN-004","Ciencia ficción"
+"El Señor de los Anillos","J.R.R. Tolkien","TOLK-001","Editorial Minotauro",2019,"Barcelona","Fantasía",24,1216,"Tapa dura",3,"3","ISBN-005","Fantasía" 

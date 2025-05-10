@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 # import pdfkit  # Comentado temporalmente
 from io import BytesIO
 from sqlalchemy import or_
+import json
 
 app = Flask(__name__, 
             template_folder='templates',
@@ -24,6 +25,39 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
     print("Base de datos inicializada correctamente")
+    
+    # Crear usuario administrador por defecto si no existe
+    admin = Usuario.query.filter_by(username='admin').first()
+    if not admin:
+        admin = Usuario(
+            username='admin',
+            email='admin@biblioteca.com',
+            nombre='Administrador',
+            apellido='Sistema',
+            cedula='0000000000',
+            telefono='0000000000',
+            is_admin=True
+        )
+        admin.set_password('admin123')
+        db.session.add(admin)
+        db.session.commit()
+        print("Usuario administrador creado")
+
+    # Importar libros desde el archivo JSON si existe
+    try:
+        if os.path.exists('libros.json'):
+            with open('libros.json', 'r', encoding='utf-8') as f:
+                libros_data = json.load(f)
+            
+            # Verificar si ya existen libros
+            if Libro.query.count() == 0:
+                for libro_data in libros_data:
+                    libro = Libro(**libro_data)
+                    db.session.add(libro)
+                db.session.commit()
+                print(f"Se importaron {len(libros_data)} libros correctamente")
+    except Exception as e:
+        print(f"Error al importar libros: {str(e)}")
 
 LIBROS_POR_PAGINA = 10
 
