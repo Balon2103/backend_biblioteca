@@ -16,11 +16,6 @@ def create_app(config_name='default'):
     # Inicializar SQLAlchemy con la app
     db.init_app(app)
 
-    # Importar modelos
-    from app.models.usuario import Usuario
-    from app.models.libro import Libro
-    from app.models.prestamo import Prestamo, PersonaPrestamo
-
     # Registrar blueprints
     from app.routes.main import main as main_blueprint
     from app.routes.auth import auth as auth_blueprint
@@ -34,8 +29,14 @@ def create_app(config_name='default'):
     from app.utils.helpers import formatear_valor
     app.context_processor(lambda: dict(formatear_valor=formatear_valor))
 
-    # Crear tablas de la base de datos
+    # Importar modelos después de registrar los blueprints
     with app.app_context():
+        # Importar modelos
+        from app.models.usuario import Usuario
+        from app.models.libro import Libro
+        from app.models.prestamo import Prestamo, PersonaPrestamo
+        
+        # Crear tablas de la base de datos
         db.create_all()
         print("Base de datos inicializada correctamente")
 

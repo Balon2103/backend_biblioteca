@@ -1,5 +1,4 @@
 from app import db
-from app.models.prestamo import Prestamo, PersonaPrestamo
 
 class Libro(db.Model):
     __tablename__ = 'libros'
@@ -21,9 +20,9 @@ class Libro(db.Model):
     materias = db.Column(db.String(200))
     disponible = db.Column(db.Boolean, default=True)
     
-    # Relaciones
-    prestamos = db.relationship(Prestamo, backref='libro', lazy=True)
-    prestamos_externos = db.relationship(PersonaPrestamo, backref='libro', lazy=True)
+    # Relaciones usando strings para evitar importaciones circulares
+    prestamos = db.relationship('Prestamo', backref='libro', lazy=True)
+    prestamos_externos = db.relationship('PersonaPrestamo', backref='libro', lazy=True)
     
     def __repr__(self):
         return f'<Libro {self.titulo}>' 

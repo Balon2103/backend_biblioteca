@@ -1,7 +1,5 @@
 from app import db
 from datetime import datetime
-from app.models.usuario import Usuario
-from app.models.libro import Libro
 
 class Prestamo(db.Model):
     __tablename__ = 'prestamos'
@@ -14,8 +12,8 @@ class Prestamo(db.Model):
     fecha_devolucion_real = db.Column(db.DateTime)
     estado = db.Column(db.String(20), default='activo')
     
-    # Relaciones
-    usuario = db.relationship(Usuario, backref='prestamos')
+    # Relaciones usando strings para evitar importaciones circulares
+    usuario = db.relationship('Usuario', backref='prestamos')
     
     def marcar_como_devuelto(self):
         self.fecha_devolucion_real = datetime.utcnow()
