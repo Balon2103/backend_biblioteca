@@ -16,6 +16,11 @@ def create_app(config_name='default'):
     # Inicializar SQLAlchemy con la app
     db.init_app(app)
 
+    # Importar modelos
+    from app.models.usuario import Usuario
+    from app.models.libro import Libro
+    from app.models.prestamo import Prestamo, PersonaPrestamo
+
     # Registrar blueprints
     from app.routes.main import main as main_blueprint
     from app.routes.auth import auth as auth_blueprint
