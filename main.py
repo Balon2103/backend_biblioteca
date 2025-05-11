@@ -96,7 +96,7 @@ def admin_required(f):
             flash('Por favor inicie sesión para acceder a esta página', 'warning')
             return redirect(url_for('login'))
         user = db.session.get(Usuario, session['user_id'])
-        if not user or not user.is_admin:
+        if not user or (not user.is_admin and not user.is_superadmin):
             flash('No tiene permisos para acceder a esta página', 'danger')
             return redirect(url_for('index'))
         return f(*args, **kwargs)
@@ -186,7 +186,7 @@ def login():
             session['is_admin'] = user.is_admin  # Guardar el estado de administrador
             session['rol'] = user.rol  # Guardar el rol del usuario
             flash('Inicio de sesión exitoso', 'success')
-            return redirect(url_for('admin'))
+            return redirect(url_for('index'))
         
         flash('Usuario o contraseña incorrectos', 'danger')
     return render_template('login.html')

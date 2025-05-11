@@ -71,7 +71,7 @@
                 </ul>
 
                 <!-- Navegación de administración -->
-                {% if session.get('user_id') and session.get('is_admin') %}
+                {% if session.get('user_id') and (session.get('is_admin') or session.get('rol') == 'superadmin') %}
                 <ul class="navbar-nav me-3">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
