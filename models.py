@@ -11,6 +11,7 @@ class Usuario(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean, default=False)
+    rol = db.Column(db.String(20), default='usuario')  # 'usuario', 'admin', 'superadmin'
     nombre = db.Column(db.String(100))
     apellido = db.Column(db.String(100))
     cedula = db.Column(db.String(20), unique=True)
@@ -36,6 +37,10 @@ class Usuario(db.Model):
             return Usuario.query.filter_by(email=email).first()
         except:
             return None
+            
+    @property
+    def is_superadmin(self):
+        return self.rol == 'superadmin'
 
 class Libro(db.Model):
     __tablename__ = 'libros'

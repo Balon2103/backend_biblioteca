@@ -24,24 +24,43 @@ db.init_app(app)
 # Crear las tablas al iniciar la aplicación
 with app.app_context():
     db.create_all()
-    print("Base de datos inicializada correctamente")
     
-    # Crear usuario administrador por defecto si no existe
+    # Verificar si existe el superadmin
+    superadmin = Usuario.query.filter_by(username='superadmin').first()
+    if not superadmin:
+        superadmin = Usuario(
+            username='superadmin',
+            nombre='Super',
+            apellido='Administrador',
+            cedula='0000000000',
+            email='superadmin@biblioteca.com',
+            telefono='0000000000',
+            rol='superadmin'
+        )
+        superadmin.set_password('superadmin123')
+        db.session.add(superadmin)
+    
+    # Verificar si existe el admin
     admin = Usuario.query.filter_by(username='admin').first()
     if not admin:
         admin = Usuario(
             username='admin',
-            email='admin@biblioteca.com',
-            nombre='Administrador',
+            nombre='Admin',
             apellido='Sistema',
-            cedula='0000000000',
-            telefono='0000000000',
-            is_admin=True
+            cedula='0000000001',
+            email='admin@biblioteca.com',
+            telefono='0000000001',
+            rol='admin'
         )
         admin.set_password('admin123')
         db.session.add(admin)
+    
+    try:
         db.session.commit()
-        print("Usuario administrador creado")
+        print("Usuarios administradores actualizados correctamente")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al actualizar usuarios: {str(e)}")
 
     # Importar libros desde el archivo JSON si existe
     try:
@@ -78,6 +97,19 @@ def admin_required(f):
             return redirect(url_for('login'))
         user = db.session.get(Usuario, session['user_id'])
         if not user or not user.is_admin:
+            flash('No tiene permisos para acceder a esta página', 'danger')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def superadmin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Por favor inicie sesión para acceder a esta página', 'warning')
+            return redirect(url_for('login'))
+        user = db.session.get(Usuario, session['user_id'])
+        if not user or not user.is_superadmin:
             flash('No tiene permisos para acceder a esta página', 'danger')
             return redirect(url_for('index'))
         return f(*args, **kwargs)
@@ -131,6 +163,7 @@ def login():
         if user and user.check_password(password):
             session['user_id'] = user.id
             session['is_admin'] = user.is_admin  # Guardar el estado de administrador
+            session['rol'] = user.rol  # Guardar el rol del usuario
             flash('Inicio de sesión exitoso', 'success')
             return redirect(url_for('admin'))
         
@@ -138,6 +171,7 @@ def login():
     return render_template('login.html')
 
 @app.route('/registro', methods=['GET', 'POST'])
+@superadmin_required
 def registro():
     if request.method == 'POST':
         username = request.form.get('username')
@@ -148,6 +182,7 @@ def registro():
         apellido = request.form.get('apellido')
         cedula = request.form.get('cedula')
         telefono = request.form.get('telefono')
+        rol = request.form.get('rol', 'usuario')  # Por defecto es usuario
         
         if password != confirm_password:
             flash('Las contraseñas no coinciden', 'danger')
@@ -171,14 +206,16 @@ def registro():
             nombre=nombre,
             apellido=apellido,
             cedula=cedula,
-            telefono=telefono
+            telefono=telefono,
+            rol=rol,
+            is_admin=(rol in ['admin', 'superadmin'])
         )
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
         
-        flash('Registro exitoso. Por favor inicie sesión.', 'success')
-        return redirect(url_for('login'))
+        flash('Usuario registrado exitosamente.', 'success')
+        return redirect(url_for('admin'))
     
     return render_template('registro.html')
 
@@ -673,6 +710,64 @@ def mis_prestamos():
         print(f"Error al cargar mis préstamos: {str(e)}")
         flash('Error al cargar tus préstamos', 'danger')
         return redirect(url_for('index'))
+
+@app.route('/gestion_usuarios')
+@superadmin_required
+def gestion_usuarios():
+    usuarios = Usuario.query.all()
+    return render_template('gestion_usuarios.html', usuarios=usuarios)
+
+@app.route('/eliminar_usuario/<int:user_id>', methods=['POST'])
+@superadmin_required
+def eliminar_usuario(user_id):
+    usuario = Usuario.query.get_or_404(user_id)
+    if usuario.rol == 'superadmin':
+        flash('No puedes eliminar al superadmin.', 'danger')
+        return redirect(url_for('gestion_usuarios'))
+    db.session.delete(usuario)
+    db.session.commit()
+    flash('Usuario eliminado correctamente.', 'success')
+    return redirect(url_for('gestion_usuarios'))
+
+@app.route('/editar_usuario/<int:user_id>', methods=['GET', 'POST'])
+@superadmin_required
+def editar_usuario(user_id):
+    usuario = Usuario.query.get_or_404(user_id)
+    
+    # No permitir editar superadmin
+    if usuario.rol == 'superadmin':
+        flash('No puedes editar al superadmin.', 'danger')
+        return redirect(url_for('gestion_usuarios'))
+    
+    if request.method == 'POST':
+        # Actualizar datos del usuario
+        usuario.username = request.form.get('username')
+        usuario.nombre = request.form.get('nombre')
+        usuario.apellido = request.form.get('apellido')
+        usuario.email = request.form.get('email')
+        usuario.telefono = request.form.get('telefono')
+        usuario.cedula = request.form.get('cedula')
+        usuario.rol = request.form.get('rol')
+        usuario.is_admin = (usuario.rol in ['admin', 'superadmin'])
+        
+        # Si se proporcionó una nueva contraseña, actualizarla
+        nueva_password = request.form.get('password')
+        if nueva_password:
+            usuario.set_password(nueva_password)
+        
+        try:
+            db.session.commit()
+            flash('Usuario actualizado exitosamente.', 'success')
+            return redirect(url_for('gestion_usuarios'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Error al actualizar el usuario. Verifica que el nombre de usuario o email no estén en uso.', 'danger')
+    
+    return render_template('editar_usuario.html', usuario=usuario)
+
+@app.route('/bienvenida')
+def bienvenida():
+    return render_template('bienvenida.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Bienvenido a Biblioteca Fupagua{% endblock %}
+
+{% block content %}
+<div class="welcome-container">
+    <div class="welcome-content text-center">
+        <h1 class="display-4 mb-4 animate__animated animate__fadeInDown">
+            <i class="fas fa-book-reader"></i> Bienvenido a Biblioteca Fupagua
+        </h1>
+        <p class="lead mb-5 animate__animated animate__fadeInUp">
+            Tu puerta de entrada al conocimiento y la cultura
+        </p>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-4 mb-4 animate__animated animate__fadeInLeft">
+                <div class="feature-card">
+                    <i class="fas fa-book fa-3x mb-3"></i>
+                    <h3>Catálogo Digital</h3>
+                    <p>Explora nuestra extensa colección de libros y recursos digitales</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 animate__animated animate__fadeInUp">
+                <div class="feature-card">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <h3>Comunidad</h3>
+                    <p>Únete a nuestra comunidad de lectores y estudiantes</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 animate__animated animate__fadeInRight">
+                <div class="feature-card">
+                    <i class="fas fa-clock fa-3x mb-3"></i>
+                    <h3>Acceso 24/7</h3>
+                    <p>Accede a nuestros recursos en cualquier momento</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 animate__animated animate__fadeInUp">
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-right"></i> Explorar Catálogo
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .welcome-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(124, 77, 255, 0.1));
+    }
+
+    .welcome-content {
+        max-width: 1200px;
+        padding: 2rem;
+    }
+
+    .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .feature-card i {
+        color: var(--primary-color);
+    }
+
+    .feature-card h3 {
+        color: var(--text-color);
+        margin: 1rem 0;
+    }
+
+    .feature-card p {
+        color: #666;
+    }
+
+    .btn-primary {
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        box-shadow: var(--card-shadow);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .animate__animated {
+        animation-duration: 1s;
+    }
+</style>
+{% endblock %} 
