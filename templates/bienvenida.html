@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Bienvenido a Biblioteca Fupagua{% endblock %}
+{% block title %}Bienvenido a Biblioteca Juana Milano de Diaz{% endblock %}
 
 {% block content %}
 <div class="welcome-container">
     <div class="welcome-content text-center">
         <h1 class="display-4 mb-4 animate__animated animate__fadeInDown">
-            <i class="fas fa-book-reader"></i> Bienvenido a Biblioteca Fupagua
+            <i class="fas fa-book-reader"></i> Bienvenido a Biblioteca Juana Milano de Diaz
         </h1>
         <p class="lead mb-5 animate__animated animate__fadeInUp">
             Tu puerta de entrada al conocimiento y la cultura
@@ -37,7 +37,7 @@
         </div>
 
         <div class="mt-5 animate__animated animate__fadeInUp">
-            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+            <a href="{{ url_for('catalogo') }}" class="btn btn-primary btn-lg">
                 <i class="fas fa-arrow-right"></i> Explorar Catálogo
             </a>
         </div>

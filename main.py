@@ -126,27 +126,48 @@ def utility_processor():
 
 @app.route('/')
 def index():
+    return render_template('bienvenida.html')
+
+@app.route('/catalogo')
+def catalogo():
     page = request.args.get('page', 1, type=int)
     per_page = 12
     query = request.args.get('q', '')
+    categoria = request.args.get('categoria', '')
     
+    # Construir la consulta base
+    libros_query = Libro.query
+    
+    # Aplicar filtro de categoría si se especifica
+    if categoria:
+        libros_query = libros_query.filter(Libro.materias.ilike(f'%{categoria}%'))
+    
+    # Aplicar búsqueda por texto si se especifica
     if query:
-        libros = Libro.query.filter(
+        search_term = f'%{query}%'
+        libros_query = libros_query.filter(
             or_(
-                Libro.titulo.ilike(f'%{query}%'),
-                Libro.autor.ilike(f'%{query}%'),
-                Libro.editorial.ilike(f'%{query}%'),
-                Libro.materias.ilike(f'%{query}%')
+                Libro.titulo.ilike(search_term),
+                Libro.autor.ilike(search_term),
+                Libro.editorial.ilike(search_term),
+                Libro.cota.ilike(search_term),
+                Libro.coleccion.ilike(search_term),
+                Libro.materias.ilike(search_term)
             )
-        ).paginate(page=page, per_page=per_page)
-    else:
-        libros = Libro.query.paginate(page=page, per_page=per_page)
+        )
+    
+    # Ordenar por título
+    libros_query = libros_query.order_by(Libro.titulo)
+    
+    # Paginar los resultados
+    libros = libros_query.paginate(page=page, per_page=per_page)
     
     # Obtener todas las materias únicas para el filtro
     materias = db.session.query(Libro.materias).distinct().all()
     materias = [m[0] for m in materias if m[0]]  # Filtrar valores None
+    materias.sort()  # Ordenar las materias alfabéticamente
     
-    return render_template('index.html', libros=libros, query=query, materias=materias)
+    return render_template('index.html', libros=libros, query=query, categoria=categoria, materias=materias)
 
 @app.route('/libro/<int:id>')
 def detalle_libro(id):
