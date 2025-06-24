@@ -1,67 +1,120 @@
 {% extends "base.html" %}
 
+{% block title %}{{ libro.titulo }} - Detalles{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="display-5 fw-bold text-primary">Detalles del Libro</h1>
-                <div>
-                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-2">
-                        <i class="fas fa-arrow-left me-1"></i> Volver
-                    </a>
-                    <button onclick="window.print()" class="btn btn-primary">
-                        <i class="fas fa-print me-1"></i> Imprimir Ficha
-                    </button>
-                </div>
+<div class="row">
+    <div class="col-md-4">
+        {% if libro.portada %}
+        <div class="card">
+            <img src="{{ url_for('static', filename=libro.portada) }}" class="card-img-top" alt="Portada de {{ libro.titulo }}" style="height: 400px; object-fit: cover;">
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center" style="height: 400px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-book fa-5x text-muted"></i>
             </div>
         </div>
+        {% endif %}
     </div>
-
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <h2 class="card-title mb-3">{{ formatear_valor(libro.titulo) }}</h2>
-                            <h4 class="text-muted mb-4">{{ formatear_valor(libro.autor) }}</h4>
-                            
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <p><strong><i class="fas fa-building text-primary me-2"></i>Editorial:</strong> {{ formatear_valor(libro.editorial) }}</p>
-                                    <p><strong><i class="fas fa-calendar text-primary me-2"></i>Año:</strong> {{ formatear_valor(libro.anio_edicion) }}</p>
-                                    <p><strong><i class="fas fa-map-marker-alt text-primary me-2"></i>Ciudad:</strong> {{ formatear_valor(libro.ciudad) }}</p>
-                                    <p><strong><i class="fas fa-barcode text-primary me-2"></i>COTA:</strong> {{ formatear_valor(libro.cota) }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong><i class="fas fa-book text-primary me-2"></i>Colección:</strong> {{ formatear_valor(libro.coleccion) }}</p>
-                                    <p><strong><i class="fas fa-ruler text-primary me-2"></i>Medidas:</strong> {{ formatear_valor(libro.medidas) }}</p>
-                                    <p><strong><i class="fas fa-file-alt text-primary me-2"></i>Páginas:</strong> {{ formatear_valor(libro.num_paginas) }}</p>
-                                    <p><strong><i class="fas fa-book-open text-primary me-2"></i>Tomos:</strong> {{ formatear_valor(libro.tomos) }}</p>
-                                </div>
-                            </div>
-
-                            {% if libro.materias %}
-                            <div class="mb-4">
-                                <h5><i class="fas fa-tags text-primary me-2"></i>Materias:</h5>
-                                <div class="d-flex flex-wrap gap-2">
-                                    {% for materia in libro.materias.split(',') %}
-                                    <span class="badge bg-primary">{{ materia.strip() }}</span>
-                                    {% endfor %}
-                                </div>
-                            </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title mb-0">{{ libro.titulo }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Información Básica</h5>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Autor:</strong></td>
+                                <td>{{ formatear_valor(libro.autor) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Editorial:</strong></td>
+                                <td>{{ formatear_valor(libro.editorial) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ciudad:</strong></td>
+                                <td>{{ formatear_valor(libro.ciudad) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Año de Edición:</strong></td>
+                                <td>{{ formatear_valor(libro.anio_edicion) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Colección:</strong></td>
+                                <td>{{ formatear_valor(libro.coleccion) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Número de Páginas:</strong></td>
+                                <td>{{ formatear_valor(libro.num_paginas) }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Detalles Técnicos</h5>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Medidas:</strong></td>
+                                <td>{{ formatear_valor(libro.medidas) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Formato:</strong></td>
+                                <td>{{ formatear_valor(libro.caract_formato) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ejemplares:</strong></td>
+                                <td>{{ formatear_valor(libro.cant_ejemplares) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tomos:</strong></td>
+                                <td>{{ formatear_valor(libro.tomos) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cota:</strong></td>
+                                <td>{{ formatear_valor(libro.cota) }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Verificación:</strong></td>
+                                <td>{{ formatear_valor(libro.verificacion) }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h5>Materias</h5>
+                        <p class="text-muted">{{ formatear_valor(libro.materias) }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ url_for('catalogo', page=page, q=query, categoria=categoria) }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Volver
+                            </a>
+                            <a href="{{ url_for('ficha_bibliografica', id=libro.id) }}" class="btn btn-info" target="_blank">
+                                <i class="fas fa-print me-1"></i> Imprimir Ficha Normal
+                            </a>
+                            <a href="{{ url_for('ficha_bibliografica_compacta', id=libro.id) }}" class="btn btn-info" target="_blank">
+                                <i class="fas fa-print me-1"></i> Imprimir Ficha Compacta
+                            </a>
+                            {% if libro.disponible and session.get('user_id') %}
+                                {% if session.get('is_admin') %}
+                                    <a href="{{ url_for('seleccionar_tipo_prestamo', libro_id=libro.id) }}" class="btn btn-success">
+                                        <i class="fas fa-book me-1"></i> Registrar Préstamo
+                                    </a>
+                                {% else %}
+                                    <a href="{{ url_for('nuevo_prestamo', libro_id=libro.id) }}" class="btn btn-success">
+                                        <i class="fas fa-book me-1"></i> Registrar Préstamo
+                                    </a>
+                                {% endif %}
                             {% endif %}
-
-                            <div class="mb-4">
-                                <h5><i class="fas fa-info-circle text-primary me-2"></i>Características:</h5>
-                                <p>{{ formatear_valor(libro.caract_formato) }}</p>
-                            </div>
-
-                            <div class="mb-4">
-                                <h5><i class="fas fa-check-circle text-primary me-2"></i>Verificación:</h5>
-                                <p>{{ formatear_valor(libro.verificacion) }}</p>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -69,34 +122,4 @@
         </div>
     </div>
 </div>
-
-<style>
-@media print {
-    .btn, nav, footer {
-        display: none !important;
-    }
-    .container {
-        width: 100%;
-        max-width: none;
-    }
-    .card {
-        border: none !important;
-        box-shadow: none !important;
-    }
-    .card-body {
-        padding: 0 !important;
-    }
-    h1, h2, h3, h4, h5 {
-        color: black !important;
-    }
-    .text-primary {
-        color: black !important;
-    }
-    .badge {
-        border: 1px solid black !important;
-        color: black !important;
-        background: none !important;
-    }
-}
-</style>
 {% endblock %} 

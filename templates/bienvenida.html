@@ -6,7 +6,7 @@
 <div class="welcome-container">
     <div class="welcome-content text-center">
         <h1 class="display-4 mb-4 animate__animated animate__fadeInDown">
-            <i class="fas fa-book-reader"></i> Bienvenido a Biblioteca Juana Milano de Diaz
+            <i class="fas fa-book-reader"></i> Bienvenido a la Biblioteca Juana Milano de Diaz
         </h1>
         <p class="lead mb-5 animate__animated animate__fadeInUp">
             Tu puerta de entrada al conocimiento y la cultura
@@ -14,24 +14,31 @@
         
         <div class="row justify-content-center">
             <div class="col-md-4 mb-4 animate__animated animate__fadeInLeft">
-                <div class="feature-card">
-                    <i class="fas fa-book fa-3x mb-3"></i>
-                    <h3>Catálogo Digital</h3>
-                    <p>Explora nuestra extensa colección de libros y recursos digitales</p>
-                </div>
+                <a href="{{ url_for('catalogo') }}" class="text-decoration-none">
+                    <div class="feature-card">
+                        <i class="fas fa-book fa-3x mb-3"></i>
+                        <h3>Catálogo Bibliotecario</h3>
+                        <p>Explora nuestra extensa colección de libros</p>
+                    </div>
+                </a>
             </div>
             <div class="col-md-4 mb-4 animate__animated animate__fadeInUp">
-                <div class="feature-card">
-                    <i class="fas fa-users fa-3x mb-3"></i>
-                    <h3>Comunidad</h3>
-                    <p>Únete a nuestra comunidad de lectores y estudiantes</p>
-                </div>
+                <a href="https://maps.app.goo.gl/UwyY63CgptbbdkSM8" target="_blank" class="text-decoration-none">
+                    <div class="feature-card">
+                        <i class="fas fa-users fa-3x mb-3"></i>
+                        <h3>Comunidad</h3>
+                        <p>Únete a nuestra comunidad de lectores y estudiantes</p>
+                        <small class="text-muted">
+                            <i class="fas fa-map-marker-alt"></i> Ver ubicación
+                        </small>
+                    </div>
+                </a>
             </div>
             <div class="col-md-4 mb-4 animate__animated animate__fadeInRight">
                 <div class="feature-card">
                     <i class="fas fa-clock fa-3x mb-3"></i>
-                    <h3>Acceso 24/7</h3>
-                    <p>Accede a nuestros recursos en cualquier momento</p>
+                    <h3>Acceso en horario laboral</h3>
+                    <p>Dudas a través del correo bibliotecajmd.fupagua@gmail.com</p>
                 </div>
             </div>
         </div>
@@ -40,6 +47,95 @@
             <a href="{{ url_for('catalogo') }}" class="btn btn-primary btn-lg">
                 <i class="fas fa-arrow-right"></i> Explorar Catálogo
             </a>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de Reseña Biográfica -->
+<div class="biography-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <div class="biography-card">
+                    <div class="biography-header text-center mb-4 row align-items-center">
+                        <div class="col-md-3 text-center mb-3 mb-md-0">
+                            <img src="{{ url_for('static', filename='uploads/biografia/juana_milano.jpg') }}" alt="Juana Josefa Milano Durán de Díaz" class="biography-photo img-fluid rounded-circle shadow" style="max-width: 200px; border: 6px solid #fff; object-fit: cover;">
+                        </div>
+                        <div class="col-md-9">
+                            <h2 class="biography-title">
+                                <i class="fas fa-user-graduate text-primary"></i> 
+                                Juana Josefa Milano Durán de Díaz
+                            </h2>
+                            <p class="biography-subtitle">Fundadora y Matriarca de la Biblioteca</p>
+                            <div class="biography-dates">
+                                <span class="badge bg-primary">21/09/1919 - 14/08/2004</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="biography-content">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <p class="biography-text">
+                                    Juana Josefa Milano Durán nace en la segunda década del siglo XX (21/09/1919-14/08/2004) en la ciudad de Valle de la Pascua, estado Guárico, siendo la onceava hija de don Gumersindo Milano y doña Octavia Manuela Durán de Milano.
+                                </p>
+                                
+                                <p class="biography-text">
+                                    Enseñar siempre fue su norte, siendo una veinteañera concursó y obtuvo una de las tres becas que se otorgaron en el estado para estudiar en la Escuela Normal Gran Colombia en Caracas. Se graduó en 1943 como integrante de la Promoción Simón Rodríguez.
+                                </p>
+                                
+                                <p class="biography-text">
+                                    En los años cuarenta se casó con Manuel Díaz Vera, un comerciante de Valle de La Pascua, y se mudan a Puerto Ayacucho, Territorio Federal Amazonas. Allí se dedica a trabajar para mejorar la educación de los niños de la localidad.
+                                </p>
+                                
+                                <p class="biography-text">
+                                    En el año 1945, siendo normalista y directora, logra la fundación de la Escuela "General Rafael Urdaneta" en Puerto Ayacucho, comenzando con 4to, 5to y 6to grado de educación primaria. Posteriormente, al caer la dictadura del General Marcos Pérez Jiménez, la institución cambió su nombre por "Monseñor Enrique de Ferrari".
+                                </p>
+                                
+                                <p class="biography-text">
+                                    Doña Juanita Milano de Díaz fue la directora y maestra de aula de la primera promoción de 6to Grado de educación primaria en el año 1948 de la capital de la Amazonia Venezolana.
+                                </p>
+                                
+                                <p class="biography-text">
+                                    En el año 1978, recibe de manos del presidente Carlos Andrés Pérez, en compañía del Ministro de Educación Carlos Rafael Silva, la "Orden 27 de Junio" en su Primera Clase como reconocimiento a los méritos distinguidos y trayectoria en sus 30 años consecutivos de servicio en la docencia.
+                                </p>
+                                
+                                <p class="biography-text">
+                                    En septiembre de 2018, en la septuagésima octava asamblea de miembros ordinarios de la Fundación de personas autistas del Guárico (FUPAGUA), en la ciudad de San Juan de los Morros, se decide bautizar una biblioteca especializada con su nombre, en vista de su noble y permanente promoción de la lectura, y como matriarca de la familia cuyos libros constituyeron el primer fondo literario de la institución.
+                                </p>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="biography-highlights">
+                                    <div class="highlight-card">
+                                        <i class="fas fa-graduation-cap text-success"></i>
+                                        <h5>Educación</h5>
+                                        <p>Escuela Normal Gran Colombia<br>Promoción Simón Rodríguez (1943)</p>
+                                    </div>
+                                    
+                                    <div class="highlight-card">
+                                        <i class="fas fa-school text-info"></i>
+                                        <h5>Fundación Escolar</h5>
+                                        <p>Escuela "General Rafael Urdaneta"<br>Puerto Ayacucho (1945)</p>
+                                    </div>
+                                    
+                                    <div class="highlight-card">
+                                        <i class="fas fa-medal text-warning"></i>
+                                        <h5>Reconocimiento</h5>
+                                        <p>Orden 27 de Junio<br>Primera Clase (1978)</p>
+                                    </div>
+                                    
+                                    <div class="highlight-card">
+                                        <i class="fas fa-book text-primary"></i>
+                                        <h5>Legado</h5>
+                                        <p>Biblioteca especializada<br>FUPAGUA (2018)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -103,6 +199,125 @@
 
     .animate__animated {
         animation-duration: 1s;
+    }
+
+    /* Estilos específicos para la tarjeta clickeable */
+    a .feature-card {
+        cursor: pointer;
+    }
+
+    a:hover .feature-card {
+        transform: translateY(-10px);
+        box-shadow: var(--hover-shadow);
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+
+    /* Estilos específicos para el enlace de ubicación */
+    .feature-card small {
+        transition: all 0.3s ease;
+    }
+
+    a:hover .feature-card small {
+        color: var(--primary-color) !important;
+    }
+
+    /* Estilos para la sección de biografía */
+    .biography-section {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 4rem 0;
+        margin-top: 2rem;
+    }
+
+    .biography-card {
+        background: white;
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-left: 6px solid var(--primary-color);
+    }
+
+    .biography-title {
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .biography-subtitle {
+        color: #6c757d;
+        font-size: 1.2rem;
+        font-style: italic;
+        margin-bottom: 1rem;
+    }
+
+    .biography-dates {
+        margin-bottom: 2rem;
+    }
+
+    .biography-dates .badge {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .biography-text {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #495057;
+        margin-bottom: 1.5rem;
+        text-align: justify;
+    }
+
+    .biography-highlights {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 15px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .highlight-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border-left: 3px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .highlight-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .highlight-card i {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .highlight-card h5 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .highlight-card p {
+        color: #6c757d;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .biography-photo {
+        max-width: 200px;
+        width: 100%;
+        aspect-ratio: 1/1;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 6px solid #fff;
+        box-shadow: 0 4px 16px rgba(44, 62, 80, 0.15);
+        margin-bottom: 1rem;
+        background: #f8f9fa;
     }
 </style>
 {% endblock %} 

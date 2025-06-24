@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carnet - {{ miembro.nombre_completo }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: white;
+        }
+        
+        .carnet-print {
+            width: 85.6mm; /* Tamaño estándar de carnet */
+            height: 54mm;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 8px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .carnet-header {
+            text-align: center;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+        }
+        
+        .carnet-header h3 {
+            margin: 0;
+            color: #000;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .carnet-header p {
+            margin: 2px 0 0 0;
+            color: #666;
+            font-size: 10px;
+        }
+        
+        .carnet-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .carnet-photo {
+            flex-shrink: 0;
+        }
+        
+        .carnet-photo img {
+            width: 35mm;
+            height: 35mm;
+            object-fit: cover;
+            border: 1px solid #000;
+            border-radius: 4px;
+        }
+        
+        .carnet-photo .placeholder {
+            width: 35mm;
+            height: 35mm;
+            background: #ccc;
+            border: 1px solid #000;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #666;
+        }
+        
+        .carnet-info {
+            flex-grow: 1;
+            font-size: 9px;
+            line-height: 1.2;
+        }
+        
+        .info-row {
+            margin-bottom: 3px;
+            display: flex;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            min-width: 20px;
+            color: #000;
+        }
+        
+        .info-value {
+            color: #333;
+        }
+        
+        .carnet-number {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 10px;
+        }
+        
+        .carnet-footer {
+            position: absolute;
+            bottom: 5px;
+            left: 8px;
+            right: 8px;
+            text-align: center;
+            font-size: 7px;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 3px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+        
+        .status-activo {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-inactivo {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .status-suspendido {
+            background: #ffc107;
+            color: black;
+        }
+        
+        /* Estilos para impresión */
+        @media print {
+            body {
+                padding: 0;
+            }
+            
+            .carnet-print {
+                page-break-inside: avoid;
+                margin: 10px auto;
+            }
+        }
+        
+        /* Estilos para vista previa en pantalla */
+        @media screen {
+            .carnet-print {
+                margin: 20px auto;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="carnet-print">
+        <!-- Encabezado -->
+        <div class="carnet-header">
+            <h3>BIBLIOTECA</h3>
+            <p style="margin: 2px 0; font-size: 10px;">Juana Milano de Diaz</p>
+            <p>Carnet de Miembro</p>
+        </div>
+        
+        <!-- Contenido principal -->
+        <div class="carnet-content">
+            <!-- Foto -->
+            <div class="carnet-photo">
+                {% if miembro.foto %}
+                    <img src="{{ url_for('static', filename=miembro.foto, _external=True) }}" 
+                         alt="Foto de {{ miembro.nombre_completo }}">
+                {% else %}
+                    <div class="placeholder">📷</div>
+                {% endif %}
+            </div>
+            
+            <!-- Información -->
+            <div class="carnet-info">
+                <div class="info-row">
+                    <span class="info-label">Nom:</span>
+                    <span class="info-value">{{ miembro.nombres }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ape:</span>
+                    <span class="info-value">{{ miembro.apellidos }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">CI:</span>
+                    <span class="info-value">{{ miembro.cedula }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Carnet:</span>
+                    <span class="info-value carnet-number">{{ miembro.numero_carnet }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tel:</span>
+                    <span class="info-value">{{ miembro.telefono }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Est:</span>
+                    <span class="info-value">
+                        {% if miembro.estado == 'activo' %}
+                            <span class="status-badge status-activo">Activo</span>
+                        {% elif miembro.estado == 'inactivo' %}
+                            <span class="status-badge status-inactivo">Inactivo</span>
+                        {% elif miembro.estado == 'suspendido' %}
+                            <span class="status-badge status-suspendido">Suspendido</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pie del carnet -->
+        <div class="carnet-footer">
+            <div>Registrado: {{ miembro.fecha_registro.strftime('%d/%m/%Y') }}</div>
+            <div>Personal e intransferible</div>
+        </div>
+    </div>
+    
+    <script>
+        // Imprimir automáticamente al cargar la página
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html> 

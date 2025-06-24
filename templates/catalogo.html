@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Libros{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Catálogo de Libros</h1>
+    
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form method="GET" class="d-flex">
+                <input type="text" name="q" class="form-control me-2" placeholder="Buscar por título, autor o ISBN..." value="{{ request.args.get('q', '') }}">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="categoriaDropdown" data-bs-toggle="dropdown">
+                    Filtrar por Categoría
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('catalogo') }}">Todas</a></li>
+                    {% for categoria in categorias %}
+                    <li><a class="dropdown-item" href="{{ url_for('catalogo', categoria=categoria) }}">{{ categoria }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Libros -->
+    <div class="row">
+        {% for libro in libros %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if libro.portada_url %}
+                <img src="{{ libro.portada_url }}" class="card-img-top" alt="Portada de {{ libro.titulo }}" style="height: 300px; object-fit: contain;">
+                {% else %}
+                <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 300px; background-color: #f8f9fa;">
+                    <i class="fas fa-book fa-4x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ libro.titulo }}</h5>
+                    <p class="card-text">
+                        <strong>Autor:</strong> {{ libro.autor }}<br>
+                        <strong>ISBN:</strong> {{ libro.isbn }}<br>
+                        <strong>Editorial:</strong> {{ libro.editorial }}<br>
+                        <strong>Año:</strong> {{ libro.anio_publicacion }}<br>
+                        <strong>Categoría:</strong> {{ libro.categoria }}<br>
+                        <strong>Disponibles:</strong> {{ libro.cantidad }}
+                    </p>
+                    {% if libro.disponible %}
+                    <a href="{{ url_for('prestar_libro', libro_id=libro.id) }}" class="btn btn-primary">Prestar</a>
+                    {% else %}
+                    <button class="btn btn-secondary" disabled>No disponible</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('catalogo', page=pagination.prev_num, q=request.args.get('q', ''), categoria=request.args.get('categoria', '')) }}">Anterior</a>
+            </li>
+            {% endif %}
+            
+            {% for page in pagination.iter_pages() %}
+                {% if page %}
+                    <li class="page-item {% if page == pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('catalogo', page=page, q=request.args.get('q', ''), categoria=request.args.get('categoria', '')) }}">{{ page }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('catalogo', page=pagination.next_num, q=request.args.get('q', ''), categoria=request.args.get('categoria', '')) }}">Siguiente</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %} 

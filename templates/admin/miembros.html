@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Miembros{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">
+                        <i class="fas fa-users"></i> Gestión de Miembros
+                    </h3>
+                    <a href="{{ url_for('nuevo_miembro') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Nuevo Miembro
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- Filtros de búsqueda -->
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <form method="GET" class="form-inline">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="q" 
+                                           placeholder="Buscar por nombre, cédula o número de carnet..." 
+                                           value="{{ query }}">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-control" onchange="window.location.href=this.value">
+                                <option value="{{ url_for('miembros', q=query) }}">Todos los estados</option>
+                                <option value="{{ url_for('miembros', q=query, estado='activo') }}" 
+                                        {% if estado == 'activo' %}selected{% endif %}>Activo</option>
+                                <option value="{{ url_for('miembros', q=query, estado='inactivo') }}" 
+                                        {% if estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                                <option value="{{ url_for('miembros', q=query, estado='suspendido') }}" 
+                                        {% if estado == 'suspendido' %}selected{% endif %}>Suspendido</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de miembros -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Foto</th>
+                                    <th>Nombres y Apellidos</th>
+                                    <th>Cédula</th>
+                                    <th>Número de Carnet</th>
+                                    <th>Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Estado</th>
+                                    <th>Fecha de Registro</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for miembro in miembros.items %}
+                                <tr>
+                                    <td>
+                                        {% if miembro.foto %}
+                                            <img src="{{ url_for('static', filename=miembro.foto) }}" 
+                                                 alt="Foto de {{ miembro.nombre_completo }}" 
+                                                 class="rounded-circle" 
+                                                 style="width: 50px; height: 50px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ miembro.nombre_completo }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ miembro.direccion }}</small>
+                                    </td>
+                                    <td>{{ miembro.cedula }}</td>
+                                    <td>
+                                        <span class="badge badge-info">{{ miembro.numero_carnet }}</span>
+                                    </td>
+                                    <td>{{ miembro.telefono }}</td>
+                                    <td>{{ miembro.email }}</td>
+                                    <td>
+                                        {% if miembro.estado == 'activo' %}
+                                            <span class="badge badge-success">Activo</span>
+                                        {% elif miembro.estado == 'inactivo' %}
+                                            <span class="badge badge-secondary">Inactivo</span>
+                                        {% elif miembro.estado == 'suspendido' %}
+                                            <span class="badge badge-warning">Suspendido</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ miembro.fecha_registro.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('ver_carnet', id=miembro.id) }}" 
+                                               class="btn btn-sm btn-info" title="Ver Carnet">
+                                                <i class="fas fa-id-card"></i>
+                                            </a>
+                                            <a href="{{ url_for('imprimir_carnet', id=miembro.id) }}" 
+                                               class="btn btn-sm btn-success" title="Imprimir Carnet" target="_blank">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="{{ url_for('editar_miembro', id=miembro.id) }}" 
+                                               class="btn btn-sm btn-warning" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('eliminar_miembro', id=miembro.id) }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-danger" 
+                                                        onclick="return confirm('¿Está seguro de que desea eliminar este miembro? Esta acción no se puede deshacer.')" 
+                                                        title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">
+                                        <i class="fas fa-users fa-3x mb-3"></i>
+                                        <br>
+                                        No se encontraron miembros
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    {% if miembros.pages > 1 %}
+                    <nav aria-label="Paginación de miembros">
+                        <ul class="pagination justify-content-center">
+                            {% if miembros.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('miembros', page=miembros.prev_num, q=query, estado=estado) }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for page_num in miembros.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != miembros.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('miembros', page=page_num, q=query, estado=estado) }}">
+                                                {{ page_num }}
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if miembros.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('miembros', page=miembros.next_num, q=query, estado=estado) }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

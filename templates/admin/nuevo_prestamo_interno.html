@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-graduate me-2"></i>
+                        Préstamo Interno - {{ libro.titulo }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Información del libro -->
+                    <div class="alert alert-primary">
+                        <h6><i class="fas fa-book me-2"></i>Información del Libro</h6>
+                        <strong>Título:</strong> {{ libro.titulo }}<br>
+                        <strong>Autor:</strong> {{ libro.autor }}<br>
+                        <strong>Editorial:</strong> {{ libro.editorial }}<br>
+                        <strong>Cota:</strong> {{ libro.cota }}
+                    </div>
+
+                    <form method="POST">
+                        <div class="row">
+                            <!-- Selección de Miembro -->
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user-graduate me-2"></i>Seleccionar Miembro
+                                </h5>
+                                
+                                <!-- Campo de búsqueda -->
+                                <div class="mb-3">
+                                    <label for="buscar_miembro" class="form-label">
+                                        <i class="fas fa-search me-1"></i>Buscar Miembro
+                                    </label>
+                                    <input type="text" class="form-control" id="buscar_miembro" 
+                                           placeholder="Buscar por nombre, apellido, cédula o número de carnet...">
+                                    <div class="form-text">
+                                        Escriba para filtrar la lista de miembros
+                                    </div>
+                                </div>
+                                
+                                <!-- Lista de miembros -->
+                                <div class="mb-3">
+                                    <label for="miembro_id" class="form-label">Miembro de la Biblioteca *</label>
+                                    <select class="form-select" id="miembro_id" name="miembro_id" required>
+                                        <option value="">Seleccione un miembro</option>
+                                        {% for miembro in miembros %}
+                                        <option value="{{ miembro.id }}" 
+                                                data-nombre="{{ miembro.nombres }}"
+                                                data-apellido="{{ miembro.apellidos }}"
+                                                data-cedula="{{ miembro.cedula }}"
+                                                data-carnet="{{ miembro.numero_carnet }}"
+                                                data-email="{{ miembro.email }}"
+                                                data-telefono="{{ miembro.telefono }}">
+                                            {{ miembro.nombre_completo }} - Carnet: {{ miembro.numero_carnet }} - Cédula: {{ miembro.cedula }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-text">
+                                        Solo se muestran miembros con estado activo
+                                    </div>
+                                </div>
+                                
+                                <!-- Información del miembro seleccionado -->
+                                <div id="info_miembro" class="alert alert-info" style="display: none;">
+                                    <h6><i class="fas fa-user me-2"></i>Información del Miembro Seleccionado</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>Nombre:</strong> <span id="nombre_miembro"></span><br>
+                                            <strong>Apellidos:</strong> <span id="apellido_miembro"></span><br>
+                                            <strong>Cédula:</strong> <span id="cedula_miembro"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Número de Carnet:</strong> <span id="carnet_miembro"></span><br>
+                                            <strong>Email:</strong> <span id="email_miembro"></span><br>
+                                            <strong>Teléfono:</strong> <span id="telefono_miembro"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información del Préstamo -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-calendar me-2"></i>Información del Préstamo
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fecha_prestamo" class="form-label">
+                                                <i class="fas fa-calendar me-1"></i>Fecha de Préstamo
+                                            </label>
+                                            <input type="text" class="form-control" id="fecha_prestamo" 
+                                                   value="{{ fecha_prestamo.strftime('%d/%m/%Y') }}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fecha_devolucion" class="form-label">
+                                                <i class="fas fa-calendar-check me-1"></i>Fecha de Devolución Esperada
+                                            </label>
+                                            <input type="text" class="form-control" id="fecha_devolucion" 
+                                                   value="{{ fecha_devolucion.strftime('%d/%m/%Y') }}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>Beneficios del Préstamo Interno:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li>Duración de 15 días</li>
+                                        <li>Posibilidad de renovaciones</li>
+                                        <li>Notificaciones automáticas</li>
+                                        <li>Acceso a servicios especiales</li>
+                                        <li>Historial completo de préstamos</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('detalle_libro', id=libro.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Volver
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="btn_registrar" disabled>
+                                <i class="fas fa-save me-2"></i>
+                                Registrar Préstamo Interno
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const miembroSelect = document.getElementById('miembro_id');
+    const buscarInput = document.getElementById('buscar_miembro');
+    const infoMiembro = document.getElementById('info_miembro');
+    const btnRegistrar = document.getElementById('btn_registrar');
+    
+    // Opciones originales
+    const originalOptions = Array.from(miembroSelect.options);
+    
+    // Búsqueda en tiempo real
+    buscarInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        // Limpiar opciones actuales
+        miembroSelect.innerHTML = '<option value="">Seleccione un miembro</option>';
+        
+        // Filtrar opciones
+        originalOptions.forEach(option => {
+            if (option.value && option.text.toLowerCase().includes(searchTerm)) {
+                miembroSelect.appendChild(option.cloneNode(true));
+            }
+        });
+        
+        // Restaurar eventos después de recrear las opciones
+        setupMiembroSelect();
+    });
+    
+    function setupMiembroSelect() {
+        // Evento para mostrar información del miembro seleccionado
+        miembroSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            
+            if (this.value) {
+                // Mostrar información del miembro
+                document.getElementById('nombre_miembro').textContent = selectedOption.dataset.nombre;
+                document.getElementById('apellido_miembro').textContent = selectedOption.dataset.apellido;
+                document.getElementById('cedula_miembro').textContent = selectedOption.dataset.cedula;
+                document.getElementById('carnet_miembro').textContent = selectedOption.dataset.carnet;
+                document.getElementById('email_miembro').textContent = selectedOption.dataset.email;
+                document.getElementById('telefono_miembro').textContent = selectedOption.dataset.telefono;
+                
+                infoMiembro.style.display = 'block';
+                btnRegistrar.disabled = false;
+                btnRegistrar.classList.remove('btn-secondary');
+                btnRegistrar.classList.add('btn-primary');
+            } else {
+                infoMiembro.style.display = 'none';
+                btnRegistrar.disabled = true;
+                btnRegistrar.classList.remove('btn-primary');
+                btnRegistrar.classList.add('btn-secondary');
+            }
+        });
+    }
+    
+    // Configurar eventos iniciales
+    setupMiembroSelect();
+});
+</script>
+{% endblock %} 

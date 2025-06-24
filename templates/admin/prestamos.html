@@ -28,9 +28,13 @@
                         <tr>
                             <td>{{ prestamo.libro.titulo }}</td>
                             <td>
-                                <button class="btn btn-sm btn-info" onclick="verDetallesUsuario('{{ prestamo.id }}', 'Prestamo')">
-                                    {{ prestamo.usuario.nombre }} {{ prestamo.usuario.apellido }}
-                                </button>
+                                <span class="badge bg-primary">{{ prestamo.miembro.nombres }} {{ prestamo.miembro.apellidos }}</span>
+                                <br>
+                                <small class="text-muted">{{ prestamo.miembro.email }}</small>
+                                <br>
+                                <small class="text-muted">
+                                    <span class="badge bg-primary">Miembro</span>
+                                </small>
                             </td>
                             <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y') }}</td>
                             <td>{{ prestamo.fecha_devolucion_esperada.strftime('%d/%m/%Y') }}</td>
@@ -42,11 +46,14 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <form action="{{ url_for('admin_devolver_libro', prestamo_id=prestamo.id) }}" method="POST" class="d-inline">
+                                <form action="{{ url_for('devolver_libro_interno', prestamo_id=prestamo.id) }}" method="POST" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Está seguro de marcar este libro como devuelto?')">
                                         <i class="fas fa-check"></i> Devolver
                                     </button>
                                 </form>
+                                <a href="{{ url_for('detalles_prestamo', prestamo_id=prestamo.id, tipo='PrestamoInterno') }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -55,9 +62,13 @@
                         <tr>
                             <td>{{ prestamo.libro.titulo }}</td>
                             <td>
-                                <button class="btn btn-sm btn-info" onclick="verDetallesUsuario('{{ prestamo.id }}', 'PersonaPrestamo')">
-                                    {{ prestamo.nombre }} {{ prestamo.apellido }}
-                                </button>
+                                <span class="badge bg-info">{{ prestamo.nombre }} {{ prestamo.apellido }}</span>
+                                <br>
+                                <small class="text-muted">{{ prestamo.email }}</small>
+                                <br>
+                                <small class="text-muted">
+                                    <span class="badge bg-warning">{{ prestamo.tipo_prestamo_display }}</span>
+                                </small>
                             </td>
                             <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y') }}</td>
                             <td>{{ prestamo.fecha_devolucion_esperada.strftime('%d/%m/%Y') }}</td>
@@ -74,6 +85,9 @@
                                         <i class="fas fa-check"></i> Devolver
                                     </button>
                                 </form>
+                                <a href="{{ url_for('detalles_prestamo', prestamo_id=prestamo.id, tipo='PersonaPrestamo') }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -101,6 +115,7 @@
                             <th>Usuario</th>
                             <th>Fecha Préstamo</th>
                             <th>Fecha Devolución</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,12 +123,21 @@
                         <tr>
                             <td>{{ prestamo.libro.titulo }}</td>
                             <td>
-                                <button class="btn btn-sm btn-info" onclick="verDetallesUsuario('{{ prestamo.id }}', 'Prestamo')">
-                                    {{ prestamo.usuario.nombre }} {{ prestamo.usuario.apellido }}
-                                </button>
+                                <span class="badge bg-primary">{{ prestamo.miembro.nombres }} {{ prestamo.miembro.apellidos }}</span>
+                                <br>
+                                <small class="text-muted">{{ prestamo.miembro.email }}</small>
+                                <br>
+                                <small class="text-muted">
+                                    <span class="badge bg-primary">Miembro</span>
+                                </small>
                             </td>
                             <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y') }}</td>
                             <td>{{ prestamo.fecha_devolucion_real.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <a href="{{ url_for('detalles_prestamo', prestamo_id=prestamo.id, tipo='PrestamoInterno') }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </a>
+                            </td>
                         </tr>
                         {% endfor %}
                         
@@ -121,18 +145,23 @@
                         <tr>
                             <td>{{ prestamo.libro.titulo }}</td>
                             <td>
-                                <button class="btn btn-sm btn-info" onclick="verDetallesUsuario('{{ prestamo.id }}', 'PersonaPrestamo')">
-                                    {{ prestamo.nombre }} {{ prestamo.apellido }}
-                                </button>
+                                <span class="badge bg-info">{{ prestamo.nombre }} {{ prestamo.apellido }}</span>
+                                <br>
+                                <small class="text-muted">{{ prestamo.email }}</small>
                             </td>
                             <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y') }}</td>
                             <td>{{ prestamo.fecha_devolucion_real.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <a href="{{ url_for('detalles_prestamo', prestamo_id=prestamo.id, tipo='PersonaPrestamo') }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            {% if session.get('is_admin') %}
+            {% if session.get('is_admin') or session.get('rol') in ['admin', 'superadmin'] %}
             <form action="{{ url_for('borrar_historial_prestamos') }}" method="POST" class="mt-3">
                 <button type="submit" class="btn btn-danger" onclick="return confirm('¿Está seguro de borrar todo el historial de préstamos? Esta acción no se puede deshacer.')">
                     <i class="fas fa-trash"></i> Borrar Historial
@@ -145,99 +174,4 @@
         </div>
     </div>
 </div>
-
-<!-- Modal para ver detalles del usuario -->
-<div class="modal fade" id="detallesUsuarioModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-user-circle me-2"></i>
-                    Detalles del Usuario
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="detallesUsuarioBody">
-                <div class="text-center mb-3">
-                    <i class="fas fa-spinner fa-spin fa-2x text-info"></i>
-                    <p class="mt-2">Cargando información...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-function verDetallesUsuario(prestamoId, tipo) {
-    console.log('Iniciando verDetallesUsuario con:', { prestamoId, tipo });
-    
-    // Mostrar el modal primero
-    const modal = new bootstrap.Modal(document.getElementById('detallesUsuarioModal'));
-    modal.show();
-    
-    const modalBody = document.getElementById('detallesUsuarioBody');
-    
-    // Mostrar loading
-    modalBody.innerHTML = `
-        <div class="text-center mb-3">
-            <i class="fas fa-spinner fa-spin fa-2x text-info"></i>
-            <p class="mt-2">Cargando información...</p>
-        </div>
-    `;
-    
-    // Obtener datos del usuario
-    const url = `/api/prestamo/${prestamoId}?tipo=${tipo}`;
-    console.log('Haciendo fetch a:', url);
-    
-    fetch(url)
-        .then(response => {
-            console.log('Respuesta del servidor:', response);
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Datos recibidos:', data);
-            
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            let html = `
-                <div class="user-details">
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">Información Personal</h6>
-                        <p class="mb-1"><i class="fas fa-user me-2 text-info"></i><strong>Nombre:</strong> ${data.nombre} ${data.apellido}</p>
-                        <p class="mb-1"><i class="fas fa-id-card me-2 text-info"></i><strong>Cédula:</strong> ${data.cedula}</p>
-                    </div>
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">Información de Contacto</h6>
-                        ${data.direccion ? `<p class="mb-1"><i class="fas fa-map-marker-alt me-2 text-info"></i><strong>Dirección:</strong> ${data.direccion}</p>` : ''}
-                        <p class="mb-1"><i class="fas fa-phone me-2 text-info"></i><strong>Teléfono:</strong> ${data.telefono}</p>
-                        <p class="mb-1"><i class="fas fa-envelope me-2 text-info"></i><strong>Email:</strong> ${data.email}</p>
-                    </div>
-                    ${data.observaciones ? `
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">Información Adicional</h6>
-                        <p class="mb-1"><i class="fas fa-sticky-note me-2 text-info"></i><strong>Observaciones:</strong> ${data.observaciones}</p>
-                    </div>
-                    ` : ''}
-                </div>
-            `;
-            
-            console.log('HTML generado:', html);
-            modalBody.innerHTML = html;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            modalBody.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    Error al cargar los detalles del usuario: ${error.message}
-                </div>
-            `;
-        });
-}
-</script>
 {% endblock %} 

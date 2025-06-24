@@ -1,84 +1,90 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h2>Ficha Bibliográfica</h2>
-            <a href="{{ url_for('ficha_bibliografica_pdf', id=libro.id) }}" class="btn btn-primary">
-                <i class="fas fa-download"></i> Descargar PDF
-            </a>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-8">
-                    <h3 class="mb-4">{{ libro.titulo }}</h3>
-                    
-                    <table class="table">
-                        <tr>
-                            <th style="width: 200px;">Autor:</th>
-                            <td>{{ libro.autor }}</td>
-                        </tr>
-                        <tr>
-                            <th>Editorial:</th>
-                            <td>{{ libro.editorial }}</td>
-                        </tr>
-                        <tr>
-                            <th>Ciudad:</th>
-                            <td>{{ libro.ciudad }}</td>
-                        </tr>
-                        <tr>
-                            <th>Año de Edición:</th>
-                            <td>{{ libro.anio_edicion }}</td>
-                        </tr>
-                        <tr>
-                            <th>Colección:</th>
-                            <td>{{ libro.coleccion }}</td>
-                        </tr>
-                        <tr>
-                            <th>Número de Páginas:</th>
-                            <td>{{ libro.num_paginas }}</td>
-                        </tr>
-                        <tr>
-                            <th>Medidas:</th>
-                            <td>{{ libro.medidas }}</td>
-                        </tr>
-                        <tr>
-                            <th>Características del Formato:</th>
-                            <td>{{ libro.caract_formato }}</td>
-                        </tr>
-                        <tr>
-                            <th>Cantidad de Ejemplares:</th>
-                            <td>{{ libro.cant_ejemplares }}</td>
-                        </tr>
-                        <tr>
-                            <th>Tomos:</th>
-                            <td>{{ libro.tomos }}</td>
-                        </tr>
-                        <tr>
-                            <th>Cota:</th>
-                            <td>{{ libro.cota }}</td>
-                        </tr>
-                        <tr>
-                            <th>Verificación:</th>
-                            <td>{{ libro.verificacion }}</td>
-                        </tr>
-                        <tr>
-                            <th>Materias:</th>
-                            <td>{{ libro.materias }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-            
-            {% if session.get('user_id') %}
-            <div class="mt-4">
-                <a href="{{ url_for('nuevo_prestamo', libro_id=libro.id) }}" class="btn btn-success">
-                    <i class="fas fa-book"></i> Solicitar Préstamo
-                </a>
-            </div>
-            {% endif %}
-        </div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ficha Bibliográfica - {{ libro.titulo }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 9px;
+            margin: 0;
+            padding: 0;
+        }
+        .ficha {
+            border: 1px solid #000;
+            margin: 8px auto;
+            padding: 6px 8px;
+            width: 95%;
+            max-width: 500px;
+            page-break-inside: avoid;
+        }
+        .titulo {
+            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 2px;
+            color: #222;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2px;
+        }
+        td, th {
+            padding: 1px 2px;
+            vertical-align: top;
+            border: none;
+        }
+        th {
+            text-align: left;
+            font-weight: bold;
+            width: 32%;
+        }
+        .materias {
+            border-top: 1px solid #ccc;
+            margin-top: 2px;
+            padding-top: 2px;
+        }
+        @media print {
+            body {
+                font-size: 8px;
+            }
+            .ficha {
+                margin: 2px auto;
+                padding: 3px 4px;
+                max-width: 350px;
+            }
+            .titulo {
+                font-size: 9px;
+            }
+        }
+    </style>
+    <script>
+        // Abrir automáticamente el diálogo de impresión cuando se carga la página
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 500); // Pequeño delay para asegurar que la página esté completamente cargada
+        };
+    </script>
+</head>
+<body>
+    <div class="ficha">
+        <div class="titulo">{{ libro.titulo }}</div>
+        <table>
+            <tr><th>Autor:</th><td>{{ libro.autor }}</td></tr>
+            <tr><th>Editorial:</th><td>{{ libro.editorial }}</td></tr>
+            <tr><th>Ciudad:</th><td>{{ libro.ciudad }}</td></tr>
+            <tr><th>Año:</th><td>{{ libro.anio_edicion }}</td></tr>
+            <tr><th>Colección:</th><td>{{ libro.coleccion }}</td></tr>
+            <tr><th>Páginas:</th><td>{{ libro.num_paginas }}</td></tr>
+            <tr><th>Medidas:</th><td>{{ libro.medidas }}</td></tr>
+            <tr><th>Formato:</th><td>{{ libro.caract_formato }}</td></tr>
+            <tr><th>Ejemplares:</th><td>{{ libro.cant_ejemplares }}</td></tr>
+            <tr><th>Tomos:</th><td>{{ libro.tomos }}</td></tr>
+            <tr><th>Cota:</th><td>{{ libro.cota }}</td></tr>
+            <tr><th>Verificación:</th><td>{{ libro.verificacion }}</td></tr>
+        </table>
+        <div class="materias"><b>Materias:</b> {{ libro.materias }}</div>
     </div>
-</div>
-{% endblock %} 
+</body>
+</html> 

@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Detalles del Préstamo</h2>
+                <button onclick="history.back()" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información del Libro -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-book"></i> Información del Libro</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Título:</strong></td>
+                            <td>{{ libro.titulo }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Autor:</strong></td>
+                            <td>{{ libro.autor }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Editorial:</strong></td>
+                            <td>{{ libro.editorial }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cota:</strong></td>
+                            <td>{{ libro.cota }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Año:</strong></td>
+                            <td>{{ libro.anio_edicion }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Materias:</strong></td>
+                            <td>{{ libro.materias }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del Usuario -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user"></i> 
+                        {% if tipo == 'interno' %}Información del Miembro{% else %}Información del Usuario Externo{% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if tipo == 'interno' %}
+                    <!-- Foto del miembro -->
+                    <div class="text-center mb-3">
+                        {% if miembro.foto %}
+                        <img src="{{ url_for('static', filename=miembro.foto) }}" 
+                             class="img-fluid rounded-circle shadow-sm" 
+                             alt="Foto de {{ miembro.nombres }} {{ miembro.apellidos }}" 
+                             style="width: 120px; height: 120px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm" 
+                             style="width: 120px; height: 120px;">
+                            <i class="fas fa-user fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Nombre:</strong></td>
+                            <td>{{ miembro.nombres }} {{ miembro.apellidos }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cédula:</strong></td>
+                            <td>{{ miembro.cedula }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{{ miembro.email }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Teléfono:</strong></td>
+                            <td>{{ miembro.telefono }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dirección:</strong></td>
+                            <td>{{ miembro.direccion }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Número de Carnet:</strong></td>
+                            <td>{{ miembro.numero_carnet }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tipo:</strong></td>
+                            <td><span class="badge bg-primary">Miembro</span></td>
+                        </tr>
+                    </table>
+                    {% elif tipo == 'usuario' %}
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Nombre:</strong></td>
+                            <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cédula:</strong></td>
+                            <td>{{ usuario.cedula }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{{ usuario.email }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Teléfono:</strong></td>
+                            <td>{{ usuario.telefono }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rol:</strong></td>
+                            <td><span class="badge bg-primary">{{ usuario.rol }}</span></td>
+                        </tr>
+                    </table>
+                    {% else %}
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Nombre:</strong></td>
+                            <td>{{ prestamo.nombre }} {{ prestamo.apellido }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cédula:</strong></td>
+                            <td>{{ prestamo.cedula }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{{ prestamo.email }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Teléfono:</strong></td>
+                            <td>{{ prestamo.telefono }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dirección:</strong></td>
+                            <td>{{ prestamo.direccion }}</td>
+                        </tr>
+                        {% if prestamo.institucion %}
+                        <tr>
+                            <td><strong>Institución:</strong></td>
+                            <td>{{ prestamo.institucion }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if prestamo.cargo %}
+                        <tr>
+                            <td><strong>Cargo:</strong></td>
+                            <td>{{ prestamo.cargo }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td><strong>Tipo:</strong></td>
+                            <td><span class="badge bg-info">{{ prestamo.tipo_prestamo_display }}</span></td>
+                        </tr>
+                        {% if prestamo.observaciones %}
+                        <tr>
+                            <td><strong>Observaciones:</strong></td>
+                            <td>{{ prestamo.observaciones }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del Préstamo -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar"></i> Información del Préstamo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Fecha de Préstamo:</strong></td>
+                                    <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y %H:%M') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fecha de Devolución Esperada:</strong></td>
+                                    <td>{{ prestamo.fecha_devolucion_esperada.strftime('%d/%m/%Y') }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Estado:</strong></td>
+                                    <td>
+                                        {% if prestamo.estado == 'activo' %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Devuelto</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if prestamo.fecha_devolucion_real %}
+                                <tr>
+                                    <td><strong>Fecha de Devolución Real:</strong></td>
+                                    <td>{{ prestamo.fecha_devolucion_real.strftime('%d/%m/%Y %H:%M') }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

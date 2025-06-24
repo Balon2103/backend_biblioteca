@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Carnet de {{ miembro.nombre_completo }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-id-card"></i> Carnet de Miembro
+                    </h3>
+                </div>
+                <div class="card-body text-center">
+                    <!-- Carnet -->
+                    <div class="carnet-container" style="border: 2px solid #007bff; border-radius: 10px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); max-width: 400px; margin: 0 auto;">
+                        <!-- Encabezado del carnet -->
+                        <div class="carnet-header" style="border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 15px;">
+                            <h4 style="color: #007bff; margin: 0; font-weight: bold;">BIBLIOTECA</h4>
+                            <p style="color: #6c757d; margin: 5px 0 0 0; font-size: 12px;">Juana Milano de Diaz</p>
+                            <p style="color: #6c757d; margin: 2px 0 0 0; font-size: 14px;">Carnet de Miembro</p>
+                        </div>
+                        
+                        <!-- Foto del miembro -->
+                        <div class="carnet-photo" style="margin-bottom: 15px;">
+                            {% if miembro.foto %}
+                                <img src="{{ url_for('static', filename=miembro.foto) }}" 
+                                     alt="Foto de {{ miembro.nombre_completo }}" 
+                                     class="rounded-circle" 
+                                     style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #007bff;">
+                            {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
+                                     style="width: 120px; height: 120px; border: 3px solid #007bff; margin: 0 auto;">
+                                    <i class="fas fa-user text-white" style="font-size: 3rem;"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Información del miembro -->
+                        <div class="carnet-info" style="text-align: left;">
+                            <div class="info-row" style="margin-bottom: 8px;">
+                                <strong style="color: #495057; min-width: 80px; display: inline-block;">Nombre:</strong>
+                                <span style="color: #212529;">{{ miembro.nombre_completo }}</span>
+                            </div>
+                            <div class="info-row" style="margin-bottom: 8px;">
+                                <strong style="color: #495057; min-width: 80px; display: inline-block;">Cédula:</strong>
+                                <span style="color: #212529;">{{ miembro.cedula }}</span>
+                            </div>
+                            <div class="info-row" style="margin-bottom: 8px;">
+                                <strong style="color: #495057; min-width: 80px; display: inline-block;">Carnet:</strong>
+                                <span style="color: #007bff; font-weight: bold;">{{ miembro.numero_carnet }}</span>
+                            </div>
+                            <div class="info-row" style="margin-bottom: 8px;">
+                                <strong style="color: #495057; min-width: 80px; display: inline-block;">Teléfono:</strong>
+                                <span style="color: #212529;">{{ miembro.telefono }}</span>
+                            </div>
+                            <div class="info-row" style="margin-bottom: 8px;">
+                                <strong style="color: #495057; min-width: 80px; display: inline-block;">Estado:</strong>
+                                {% if miembro.estado == 'activo' %}
+                                    <span class="badge badge-success">Activo</span>
+                                {% elif miembro.estado == 'inactivo' %}
+                                    <span class="badge badge-secondary">Inactivo</span>
+                                {% elif miembro.estado == 'suspendido' %}
+                                    <span class="badge badge-warning">Suspendido</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Pie del carnet -->
+                        <div class="carnet-footer" style="border-top: 2px solid #007bff; padding-top: 10px; margin-top: 15px;">
+                            <p style="color: #6c757d; margin: 0; font-size: 12px;">
+                                Registrado el: {{ miembro.fecha_registro.strftime('%d/%m/%Y') }}
+                            </p>
+                            <p style="color: #6c757d; margin: 5px 0 0 0; font-size: 10px;">
+                                Este carnet es personal e intransferible
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de acción -->
+                    <div class="mt-4">
+                        <a href="{{ url_for('imprimir_carnet', id=miembro.id) }}" 
+                           class="btn btn-success" target="_blank">
+                            <i class="fas fa-print"></i> Imprimir Carnet
+                        </a>
+                        <a href="{{ url_for('editar_miembro', id=miembro.id) }}" 
+                           class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Editar Miembro
+                        </a>
+                        <a href="{{ url_for('miembros') }}" 
+                           class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.carnet-container {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.carnet-container:hover {
+    transform: scale(1.02);
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+}
+
+@media print {
+    .btn {
+        display: none !important;
+    }
+    
+    .carnet-container {
+        box-shadow: none !important;
+        border: 2px solid #000 !important;
+    }
+}
+</style>
+{% endblock %} 

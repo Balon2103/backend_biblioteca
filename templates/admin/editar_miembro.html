@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Miembro{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-user-edit"></i> Editar Miembro
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="nombres">Nombres *</label>
+                                    <input type="text" class="form-control" id="nombres" name="nombres" 
+                                           required maxlength="100" value="{{ miembro.nombres }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="apellidos">Apellidos *</label>
+                                    <input type="text" class="form-control" id="apellidos" name="apellidos" 
+                                           required maxlength="100" value="{{ miembro.apellidos }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="cedula">Cédula de Identidad *</label>
+                                    <input type="text" class="form-control" id="cedula" name="cedula" 
+                                           required maxlength="20" value="{{ miembro.cedula }}"
+                                           pattern="[0-9]+" title="Solo números permitidos">
+                                    <small class="form-text text-muted">Solo números, sin guiones ni espacios</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="telefono">Teléfono *</label>
+                                    <input type="tel" class="form-control" id="telefono" name="telefono" 
+                                           required maxlength="20" value="{{ miembro.telefono }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Correo Electrónico *</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   required maxlength="120" value="{{ miembro.email }}"
+                                   pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Ingrese un correo electrónico válido">
+                            <small class="form-text text-muted">Ejemplo: usuario@ejemplo.com</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="numero_carnet">Número de Carnet</label>
+                                    <input type="text" class="form-control" id="numero_carnet" name="numero_carnet" 
+                                           readonly value="{{ miembro.numero_carnet }}">
+                                    <small class="form-text text-muted">No se puede modificar</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="estado">Estado</label>
+                                    <select class="form-control" id="estado" name="estado">
+                                        <option value="activo" {% if miembro.estado == 'activo' %}selected{% endif %}>Activo</option>
+                                        <option value="inactivo" {% if miembro.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                                        <option value="suspendido" {% if miembro.estado == 'suspendido' %}selected{% endif %}>Suspendido</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="direccion">Dirección *</label>
+                            <textarea class="form-control" id="direccion" name="direccion" 
+                                      required maxlength="200" rows="3">{{ miembro.direccion }}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Foto Actual</label>
+                            <div class="text-center mb-3">
+                                {% if miembro.foto %}
+                                    <img src="{{ url_for('static', filename=miembro.foto) }}" 
+                                         alt="Foto actual de {{ miembro.nombre_completo }}" 
+                                         class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                {% else %}
+                                    <div class="bg-secondary text-white rounded p-4" style="width: 200px; height: 200px; display: inline-flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-user fa-3x"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="foto">Cambiar Foto</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="foto" name="foto" 
+                                       accept="image/*" onchange="previewImage(this)">
+                                <label class="custom-file-label" for="foto">Seleccionar nueva foto...</label>
+                            </div>
+                            <small class="form-text text-muted">
+                                Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB. Dejar vacío para mantener la foto actual.
+                            </small>
+                        </div>
+
+                        <div class="form-group" id="preview-container" style="display: none;">
+                            <label>Vista previa de la nueva foto:</label>
+                            <div class="text-center">
+                                <img id="image-preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Información del miembro:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li><strong>Número de Carnet:</strong> {{ miembro.numero_carnet }}</li>
+                                <li><strong>Fecha de Registro:</strong> {{ miembro.fecha_registro.strftime('%d/%m/%Y') }}</li>
+                            </ul>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Actualizar Miembro
+                            </button>
+                            <a href="{{ url_for('miembros') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewImage(input) {
+    const file = input.files[0];
+    const preview = document.getElementById('image-preview');
+    const container = document.getElementById('preview-container');
+    const label = document.querySelector('.custom-file-label');
+    
+    if (file) {
+        // Validar tipo de archivo
+        if (!file.type.startsWith('image/')) {
+            alert('Por favor seleccione un archivo de imagen válido.');
+            input.value = '';
+            return;
+        }
+        
+        // Validar tamaño (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+            input.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            container.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+        
+        label.textContent = file.name;
+    } else {
+        container.style.display = 'none';
+        label.textContent = 'Seleccionar nueva foto...';
+    }
+}
+
+// Validación de cédula (solo números)
+document.getElementById('cedula').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
+</script>
+{% endblock %} 

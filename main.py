@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import pandas as pd
 from extensions import db
-from models import Libro, Usuario, Prestamo, PersonaPrestamo
+from models import Libro, Usuario, Prestamo, PersonaPrestamo, Miembro, PrestamoInterno
 import os
 from datetime import datetime, timedelta
 # import pdfkit  # Comentado temporalmente
@@ -63,20 +63,20 @@ with app.app_context():
         print(f"Error al actualizar usuarios: {str(e)}")
 
     # Importar libros desde el archivo JSON si existe
-    try:
-        if os.path.exists('libros.json'):
-            with open('libros.json', 'r', encoding='utf-8') as f:
-                libros_data = json.load(f)
-            
-            # Verificar si ya existen libros
-            if Libro.query.count() == 0:
-                for libro_data in libros_data:
-                    libro = Libro(**libro_data)
-                    db.session.add(libro)
-                db.session.commit()
-                print(f"Se importaron {len(libros_data)} libros correctamente")
-    except Exception as e:
-        print(f"Error al importar libros: {str(e)}")
+    # try:
+    #     if os.path.exists('libros.json'):
+    #         with open('libros.json', 'r', encoding='utf-8') as f:
+    #             libros_data = json.load(f)
+    #             
+    #         # Verificar si ya existen libros
+    #         if Libro.query.count() == 0:
+    #             for libro_data in libros_data:
+    #                 libro = Libro(**libro_data)
+    #                 db.session.add(libro)
+    #             db.session.commit()
+    #             print(f"Se importaron {len(libros_data)} libros correctamente")
+    # except Exception as e:
+    #     print(f"Error al importar libros: {str(e)}")
 
 LIBROS_POR_PAGINA = 10
 
@@ -172,7 +172,11 @@ def catalogo():
 @app.route('/libro/<int:id>')
 def detalle_libro(id):
     libro = Libro.query.get_or_404(id)
-    return render_template('detalle_libro.html', libro=libro)
+    # Obtener parámetros de la página anterior para el botón volver
+    page = request.args.get('page', 1, type=int)
+    query = request.args.get('q', '')
+    categoria = request.args.get('categoria', '')
+    return render_template('detalle_libro.html', libro=libro, page=page, query=query, categoria=categoria)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -308,26 +312,47 @@ def admin():
 @admin_required
 def nuevo_libro():
     if request.method == 'POST':
-        libro = Libro(
-            titulo=request.form.get('titulo'),
-            autor=request.form.get('autor'),
-            cota=request.form.get('cota'),
-            editorial=request.form.get('editorial'),
-            anio_edicion=request.form.get('anio_edicion'),
-            ciudad=request.form.get('ciudad'),
-            coleccion=request.form.get('coleccion'),
-            medidas=request.form.get('medidas'),
-            num_paginas=request.form.get('num_paginas'),
-            caract_formato=request.form.get('caract_formato'),
-            cant_ejemplares=request.form.get('cant_ejemplares'),
-            tomos=request.form.get('tomos'),
-            verificacion=request.form.get('verificacion'),
-            materias=request.form.get('materias')
-        )
-        db.session.add(libro)
-        db.session.commit()
-        flash('Libro agregado exitosamente', 'success')
-        return redirect(url_for('admin'))
+        try:
+            libro = Libro(
+                titulo=request.form.get('titulo'),
+                autor=request.form.get('autor'),
+                cota=request.form.get('cota'),
+                editorial=request.form.get('editorial'),
+                anio_edicion=request.form.get('anio_edicion'),
+                ciudad=request.form.get('ciudad'),
+                coleccion=request.form.get('coleccion'),
+                medidas=request.form.get('medidas'),
+                num_paginas=request.form.get('num_paginas'),
+                caract_formato=request.form.get('caract_formato'),
+                cant_ejemplares=request.form.get('cant_ejemplares'),
+                tomos=request.form.get('tomos'),
+                verificacion=request.form.get('verificacion'),
+                materias=request.form.get('materias')
+            )
+            
+            # Manejar la portada si se subió
+            if 'portada' in request.files:
+                portada = request.files['portada']
+                if portada and portada.filename != '':
+                    # Crear directorio para portadas si no existe
+                    upload_folder = os.path.join(app.static_folder, 'uploads', 'portadas')
+                    os.makedirs(upload_folder, exist_ok=True)
+                    
+                    # Generar nombre único para la portada
+                    filename = f"portada_{libro.titulo.replace(' ', '_')}_{portada.filename}"
+                    portada_path = os.path.join(upload_folder, filename)
+                    portada.save(portada_path)
+                    libro.portada = f"uploads/portadas/{filename}"
+            
+            db.session.add(libro)
+            db.session.commit()
+            flash('Libro agregado exitosamente', 'success')
+            return redirect(url_for('admin'))
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al agregar libro: {str(e)}")
+            flash('Error al agregar el libro', 'danger')
+            return redirect(request.url)
     return render_template('admin/nuevo_libro.html')
 
 @app.route('/admin/libro/<int:id>/editar', methods=['GET', 'POST'])
@@ -335,33 +360,69 @@ def nuevo_libro():
 def editar_libro(id):
     libro = Libro.query.get_or_404(id)
     if request.method == 'POST':
-        libro.titulo = request.form.get('titulo')
-        libro.autor = request.form.get('autor')
-        libro.cota = request.form.get('cota')
-        libro.editorial = request.form.get('editorial')
-        libro.anio_edicion = request.form.get('anio_edicion')
-        libro.ciudad = request.form.get('ciudad')
-        libro.coleccion = request.form.get('coleccion')
-        libro.medidas = request.form.get('medidas')
-        libro.num_paginas = request.form.get('num_paginas')
-        libro.caract_formato = request.form.get('caract_formato')
-        libro.cant_ejemplares = request.form.get('cant_ejemplares')
-        libro.tomos = request.form.get('tomos')
-        libro.verificacion = request.form.get('verificacion')
-        libro.materias = request.form.get('materias')
-        
-        db.session.commit()
-        flash('Libro actualizado exitosamente', 'success')
-        return redirect(url_for('admin'))
+        try:
+            libro.titulo = request.form.get('titulo')
+            libro.autor = request.form.get('autor')
+            libro.cota = request.form.get('cota')
+            libro.editorial = request.form.get('editorial')
+            libro.anio_edicion = request.form.get('anio_edicion')
+            libro.ciudad = request.form.get('ciudad')
+            libro.coleccion = request.form.get('coleccion')
+            libro.medidas = request.form.get('medidas')
+            libro.num_paginas = request.form.get('num_paginas')
+            libro.caract_formato = request.form.get('caract_formato')
+            libro.cant_ejemplares = request.form.get('cant_ejemplares')
+            libro.tomos = request.form.get('tomos')
+            libro.verificacion = request.form.get('verificacion')
+            libro.materias = request.form.get('materias')
+            
+            # Manejar nueva portada si se subió
+            if 'portada' in request.files:
+                portada = request.files['portada']
+                if portada and portada.filename != '':
+                    # Crear directorio para portadas si no existe
+                    upload_folder = os.path.join(app.static_folder, 'uploads', 'portadas')
+                    os.makedirs(upload_folder, exist_ok=True)
+                    
+                    # Eliminar portada anterior si existe
+                    if libro.portada:
+                        portada_anterior = os.path.join(app.static_folder, libro.portada)
+                        if os.path.exists(portada_anterior):
+                            os.remove(portada_anterior)
+                    
+                    # Guardar nueva portada
+                    filename = f"portada_{libro.titulo.replace(' ', '_')}_{portada.filename}"
+                    portada_path = os.path.join(upload_folder, filename)
+                    portada.save(portada_path)
+                    libro.portada = f"uploads/portadas/{filename}"
+            
+            db.session.commit()
+            flash('Libro actualizado exitosamente', 'success')
+            return redirect(url_for('admin'))
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al actualizar libro: {str(e)}")
+            flash('Error al actualizar el libro', 'danger')
     return render_template('admin/editar_libro.html', libro=libro)
 
 @app.route('/admin/libro/<int:id>/eliminar', methods=['POST'])
 @admin_required
 def eliminar_libro(id):
     libro = Libro.query.get_or_404(id)
-    db.session.delete(libro)
-    db.session.commit()
-    flash('Libro eliminado exitosamente', 'success')
+    try:
+        # Eliminar portada si existe
+        if libro.portada:
+            portada_path = os.path.join(app.static_folder, libro.portada)
+            if os.path.exists(portada_path):
+                os.remove(portada_path)
+        
+        db.session.delete(libro)
+        db.session.commit()
+        flash('Libro eliminado exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al eliminar libro: {str(e)}")
+        flash('Error al eliminar el libro', 'danger')
     return redirect(url_for('admin'))
 
 @app.route('/api/libros')
@@ -416,7 +477,7 @@ def nuevo_prestamo(libro_id):
             db.session.commit()
             
             flash('Préstamo registrado exitosamente', 'success')
-            return redirect(url_for('prestamos'))
+            return redirect(url_for('mis_prestamos'))
         
         return render_template('nuevo_prestamo.html', libro=libro)
     except Exception as e:
@@ -434,7 +495,7 @@ def devolver_libro(prestamo_id):
         # Verificar que el préstamo pertenece al usuario actual o es administrador
         if prestamo.usuario_id != session['user_id'] and not Usuario.query.get(session['user_id']).is_admin:
             flash('No tiene permiso para realizar esta acción', 'danger')
-            return redirect(url_for('prestamos'))
+            return redirect(url_for('mis_prestamos'))
         
         # Verificar que el préstamo no ha sido devuelto
         if prestamo.fecha_devolucion_real is None:
@@ -454,12 +515,17 @@ def devolver_libro(prestamo_id):
         db.session.rollback()
         flash('Error al devolver el libro', 'danger')
     
-    return redirect(url_for('prestamos'))
+    return redirect(url_for('mis_prestamos'))
 
 @app.route('/libro/<int:id>/ficha')
 def ficha_bibliografica(id):
     libro = Libro.query.get_or_404(id)
     return render_template('ficha_bibliografica.html', libro=libro)
+
+@app.route('/libro/<int:id>/ficha-compacta')
+def ficha_bibliografica_compacta(id):
+    libro = Libro.query.get_or_404(id)
+    return render_template('ficha_compacta.html', libro=libro)
 
 @app.route('/libro/<int:id>/ficha/pdf')
 def ficha_bibliografica_pdf(id):
@@ -483,6 +549,8 @@ def nuevo_prestamo_externo(libro_id):
             direccion = request.form.get('direccion')
             telefono = request.form.get('telefono')
             email = request.form.get('email')
+            institucion = request.form.get('institucion')
+            cargo = request.form.get('cargo')
             observaciones = request.form.get('observaciones')
             
             # Validar campos requeridos
@@ -501,7 +569,10 @@ def nuevo_prestamo_externo(libro_id):
                 direccion=direccion,
                 telefono=telefono,
                 email=email,
+                institucion=institucion,
+                cargo=cargo,
                 observaciones=observaciones,
+                tipo_prestamo='externo',
                 libro_id=libro.id,
                 fecha_prestamo=fecha_prestamo,
                 fecha_devolucion_esperada=fecha_devolucion,
@@ -514,7 +585,7 @@ def nuevo_prestamo_externo(libro_id):
             db.session.add(prestamo)
             db.session.commit()
             
-            flash('Préstamo registrado exitosamente.', 'success')
+            flash('Préstamo externo registrado exitosamente.', 'success')
             return redirect(url_for('admin_prestamos'))
         except Exception as e:
             db.session.rollback()
@@ -527,14 +598,77 @@ def nuevo_prestamo_externo(libro_id):
                          fecha_prestamo=datetime.utcnow(), 
                          fecha_devolucion=datetime.utcnow() + timedelta(days=15))
 
+@app.route('/prestamo/interno/<int:libro_id>', methods=['GET', 'POST'])
+@admin_required
+def nuevo_prestamo_interno(libro_id):
+    libro = Libro.query.get_or_404(libro_id)
+    miembros = Miembro.query.filter_by(estado='activo').order_by(Miembro.apellidos).all()
+    
+    if not libro.disponible:
+        flash('Este libro no está disponible para préstamo', 'warning')
+        return redirect(url_for('detalle_libro', id=libro.id))
+    
+    if request.method == 'POST':
+        try:
+            miembro_id = request.form.get('miembro_id')
+            
+            if not miembro_id:
+                flash('Debe seleccionar un miembro', 'danger')
+                return redirect(request.url)
+            
+            miembro = Miembro.query.get_or_404(miembro_id)
+            
+            # Crear nuevo préstamo interno usando el modelo PrestamoInterno
+            fecha_prestamo = datetime.utcnow()
+            fecha_devolucion = fecha_prestamo + timedelta(days=15)  # 15 días para internos
+            
+            prestamo = PrestamoInterno(
+                miembro_id=miembro.id,
+                libro_id=libro.id,
+                fecha_prestamo=fecha_prestamo,
+                fecha_devolucion_esperada=fecha_devolucion,
+                estado='activo'
+            )
+            
+            # Marcar libro como no disponible
+            libro.disponible = False
+            
+            db.session.add(prestamo)
+            db.session.commit()
+            
+            flash(f'Préstamo interno registrado exitosamente para {miembro.nombre_completo}.', 'success')
+            return redirect(url_for('admin_prestamos'))
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al registrar préstamo interno: {str(e)}")
+            flash('Error al registrar el préstamo. Por favor, intente nuevamente.', 'danger')
+            return redirect(request.url)
+
+    return render_template('admin/nuevo_prestamo_interno.html', 
+                         libro=libro, 
+                         miembros=miembros,
+                         fecha_prestamo=datetime.utcnow(), 
+                         fecha_devolucion=datetime.utcnow() + timedelta(days=15))
+
+@app.route('/seleccionar-tipo-prestamo/<int:libro_id>')
+@admin_required
+def seleccionar_tipo_prestamo(libro_id):
+    libro = Libro.query.get_or_404(libro_id)
+    
+    if not libro.disponible:
+        flash('Este libro no está disponible para préstamo', 'warning')
+        return redirect(url_for('detalle_libro', id=libro.id))
+    
+    return render_template('seleccionar_tipo_prestamo.html', libro=libro)
+
 @app.route('/admin/prestamos')
 @admin_required
 def admin_prestamos():
     try:
-        # Obtener préstamos internos activos
-        prestamos_internos = Prestamo.query.filter(
-            Prestamo.estado == 'activo'
-        ).join(Usuario).join(Libro).order_by(Prestamo.fecha_prestamo.desc()).all()
+        # Obtener préstamos internos activos (del modelo PrestamoInterno)
+        prestamos_internos = PrestamoInterno.query.filter(
+            PrestamoInterno.estado == 'activo'
+        ).join(Miembro).join(Libro).order_by(PrestamoInterno.fecha_prestamo.desc()).all()
         
         # Obtener préstamos externos activos
         prestamos_externos = PersonaPrestamo.query.filter(
@@ -542,9 +676,9 @@ def admin_prestamos():
         ).join(Libro).order_by(PersonaPrestamo.fecha_prestamo.desc()).all()
         
         # Obtener historial de préstamos internos
-        historial_internos = Prestamo.query.filter(
-            Prestamo.estado == 'devuelto'
-        ).join(Usuario).join(Libro).order_by(Prestamo.fecha_prestamo.desc()).all()
+        historial_internos = PrestamoInterno.query.filter(
+            PrestamoInterno.estado == 'devuelto'
+        ).join(Miembro).join(Libro).order_by(PrestamoInterno.fecha_prestamo.desc()).all()
         
         # Obtener historial de préstamos externos
         historial_externos = PersonaPrestamo.query.filter(
@@ -554,7 +688,7 @@ def admin_prestamos():
         # Verificar y corregir libros no disponibles sin préstamos activos
         libros_no_disponibles = Libro.query.filter_by(disponible=False).all()
         for libro in libros_no_disponibles:
-            prestamo_activo = Prestamo.query.filter_by(libro_id=libro.id, estado='activo').first()
+            prestamo_activo = PrestamoInterno.query.filter_by(libro_id=libro.id, estado='activo').first()
             prestamo_externo_activo = PersonaPrestamo.query.filter_by(libro_id=libro.id, estado='activo').first()
             if not prestamo_activo and not prestamo_externo_activo:
                 print(f"Corrigiendo libro no disponible sin préstamo activo: {libro.titulo}")
@@ -690,8 +824,8 @@ def get_prestamo_details(prestamo_id):
 def borrar_historial_prestamos():
     try:
         # Borrar el historial de préstamos internos
-        Prestamo.query.filter(
-            Prestamo.estado == 'devuelto'
+        PrestamoInterno.query.filter(
+            PrestamoInterno.estado == 'devuelto'
         ).delete()
         
         # Borrar el historial de préstamos externos
@@ -789,6 +923,530 @@ def editar_usuario(user_id):
 @app.route('/bienvenida')
 def bienvenida():
     return render_template('bienvenida.html')
+
+# ==================== RUTAS PARA GESTIÓN DE MIEMBROS ====================
+
+@app.route('/miembros')
+@admin_required
+def miembros():
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    query = request.args.get('q', '')
+    estado = request.args.get('estado', '')
+    
+    # Construir la consulta base
+    miembros_query = Miembro.query
+    
+    # Aplicar filtro de estado si se especifica
+    if estado:
+        miembros_query = miembros_query.filter(Miembro.estado == estado)
+    
+    # Aplicar búsqueda por texto si se especifica
+    if query:
+        search_term = f'%{query}%'
+        miembros_query = miembros_query.filter(
+            or_(
+                Miembro.nombres.ilike(search_term),
+                Miembro.apellidos.ilike(search_term),
+                Miembro.cedula.ilike(search_term),
+                Miembro.email.ilike(search_term),
+                Miembro.numero_carnet.ilike(search_term)
+            )
+        )
+    
+    # Ordenar por apellidos
+    miembros_query = miembros_query.order_by(Miembro.apellidos)
+    
+    # Paginar los resultados
+    miembros = miembros_query.paginate(page=page, per_page=per_page)
+    
+    return render_template('admin/miembros.html', miembros=miembros, query=query, estado=estado)
+
+@app.route('/miembros/nuevo', methods=['GET', 'POST'])
+@admin_required
+def nuevo_miembro():
+    if request.method == 'POST':
+        try:
+            # Obtener datos del formulario
+            nombres = request.form.get('nombres')
+            apellidos = request.form.get('apellidos')
+            cedula = request.form.get('cedula')
+            telefono = request.form.get('telefono')
+            email = request.form.get('email')
+            direccion = request.form.get('direccion')
+            
+            # Validar campos requeridos
+            if not all([nombres, apellidos, cedula, telefono, email, direccion]):
+                flash('Todos los campos marcados con * son obligatorios', 'danger')
+                return redirect(request.url)
+            
+            # Verificar si la cédula ya existe
+            if Miembro.query.filter_by(cedula=cedula).first():
+                flash('Ya existe un miembro con esta cédula', 'danger')
+                return redirect(request.url)
+            
+            # Verificar si el email ya existe
+            if Miembro.query.filter_by(email=email).first():
+                flash('Ya existe un miembro con este correo electrónico', 'danger')
+                return redirect(request.url)
+            
+            # Crear nuevo miembro
+            miembro = Miembro(
+                nombres=nombres,
+                apellidos=apellidos,
+                cedula=cedula,
+                telefono=telefono,
+                email=email,
+                direccion=direccion,
+                estado=request.form.get('estado', 'activo')
+            )
+            
+            # Generar número de carnet
+            miembro.numero_carnet = miembro.generar_numero_carnet()
+            
+            # Manejar la foto si se subió
+            if 'foto' in request.files:
+                foto = request.files['foto']
+                if foto and foto.filename != '':
+                    # Crear directorio para fotos si no existe
+                    upload_folder = os.path.join(app.static_folder, 'uploads', 'fotos')
+                    os.makedirs(upload_folder, exist_ok=True)
+                    
+                    # Generar nombre único para la foto
+                    filename = f"miembro_{miembro.numero_carnet}_{foto.filename}"
+                    foto_path = os.path.join(upload_folder, filename)
+                    foto.save(foto_path)
+                    miembro.foto = f"uploads/fotos/{filename}"
+            
+            db.session.add(miembro)
+            db.session.commit()
+            
+            flash('Miembro registrado exitosamente', 'success')
+            return redirect(url_for('miembros'))
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al registrar miembro: {str(e)}")
+            flash('Error al registrar el miembro', 'danger')
+            return redirect(request.url)
+    
+    return render_template('admin/nuevo_miembro.html')
+
+@app.route('/miembros/<int:id>/editar', methods=['GET', 'POST'])
+@admin_required
+def editar_miembro(id):
+    miembro = Miembro.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        try:
+            # Actualizar datos básicos
+            miembro.nombres = request.form.get('nombres')
+            miembro.apellidos = request.form.get('apellidos')
+            miembro.telefono = request.form.get('telefono')
+            miembro.email = request.form.get('email')
+            miembro.direccion = request.form.get('direccion')
+            miembro.estado = request.form.get('estado', 'activo')
+            
+            # Verificar cédula única (excluyendo el miembro actual)
+            nueva_cedula = request.form.get('cedula')
+            if nueva_cedula != miembro.cedula:
+                if Miembro.query.filter_by(cedula=nueva_cedula).first():
+                    flash('Ya existe un miembro con esta cédula', 'danger')
+                    return redirect(request.url)
+                miembro.cedula = nueva_cedula
+            
+            # Verificar email único (excluyendo el miembro actual)
+            nuevo_email = request.form.get('email')
+            if nuevo_email != miembro.email:
+                if Miembro.query.filter_by(email=nuevo_email).first():
+                    flash('Ya existe un miembro con este correo electrónico', 'danger')
+                    return redirect(request.url)
+            
+            # Manejar nueva foto si se subió
+            if 'foto' in request.files:
+                foto = request.files['foto']
+                if foto and foto.filename != '':
+                    # Crear directorio para fotos si no existe
+                    upload_folder = os.path.join(app.static_folder, 'uploads', 'fotos')
+                    os.makedirs(upload_folder, exist_ok=True)
+                    
+                    # Eliminar foto anterior si existe
+                    if miembro.foto:
+                        foto_anterior = os.path.join(app.static_folder, miembro.foto)
+                        if os.path.exists(foto_anterior):
+                            os.remove(foto_anterior)
+                    
+                    # Guardar nueva foto
+                    filename = f"miembro_{miembro.numero_carnet}_{foto.filename}"
+                    foto_path = os.path.join(upload_folder, filename)
+                    foto.save(foto_path)
+                    miembro.foto = f"uploads/fotos/{filename}"
+            
+            db.session.commit()
+            flash('Miembro actualizado exitosamente', 'success')
+            return redirect(url_for('miembros'))
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al actualizar miembro: {str(e)}")
+            flash('Error al actualizar el miembro', 'danger')
+    
+    return render_template('admin/editar_miembro.html', miembro=miembro)
+
+@app.route('/miembros/<int:id>/eliminar', methods=['POST'])
+@admin_required
+def eliminar_miembro(id):
+    miembro = Miembro.query.get_or_404(id)
+    
+    try:
+        # Eliminar foto si existe
+        if miembro.foto:
+            foto_path = os.path.join(app.static_folder, miembro.foto)
+            if os.path.exists(foto_path):
+                os.remove(foto_path)
+        
+        db.session.delete(miembro)
+        db.session.commit()
+        flash('Miembro eliminado exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al eliminar miembro: {str(e)}")
+        flash('Error al eliminar el miembro', 'danger')
+    
+    return redirect(url_for('miembros'))
+
+@app.route('/miembros/<int:id>/carnet')
+@admin_required
+def ver_carnet(id):
+    miembro = Miembro.query.get_or_404(id)
+    return render_template('admin/carnet.html', miembro=miembro)
+
+@app.route('/miembros/<int:id>/carnet/imprimir')
+@admin_required
+def imprimir_carnet(id):
+    miembro = Miembro.query.get_or_404(id)
+    return render_template('admin/carnet_imprimir.html', miembro=miembro)
+
+@app.route('/api/miembros')
+@admin_required
+def api_miembros():
+    search = request.args.get('search', '')
+    miembros = Miembro.query.filter(
+        or_(
+            Miembro.nombres.ilike(f'%{search}%'),
+            Miembro.apellidos.ilike(f'%{search}%'),
+            Miembro.cedula.ilike(f'%{search}%'),
+            Miembro.email.ilike(f'%{search}%'),
+            Miembro.numero_carnet.ilike(f'%{search}%')
+        )
+    ).limit(10).all()
+    
+    return jsonify([{
+        'id': miembro.id,
+        'nombre_completo': miembro.nombre_completo,
+        'cedula': miembro.cedula,
+        'numero_carnet': miembro.numero_carnet,
+        'estado': miembro.estado
+    } for miembro in miembros])
+
+# ==================== RUTAS PARA ESTADÍSTICAS ====================
+
+@app.route('/estadisticas')
+@admin_required
+def estadisticas():
+    """Vista principal de estadísticas"""
+    try:
+        # Estadísticas generales
+        total_libros = Libro.query.count()
+        libros_disponibles = Libro.query.filter_by(disponible=True).count()
+        libros_prestados = Libro.query.filter_by(disponible=False).count()
+        total_miembros = Miembro.query.count()
+        miembros_activos = Miembro.query.filter_by(estado='activo').count()
+        
+        # Estadísticas de préstamos
+        prestamos_activos = Prestamo.query.filter_by(estado='activo').count()
+        prestamos_externos_activos = PersonaPrestamo.query.filter_by(estado='activo').count()
+        total_prestamos_activos = prestamos_activos + prestamos_externos_activos
+        
+        # Préstamos devueltos
+        prestamos_devueltos = Prestamo.query.filter_by(estado='devuelto').count()
+        prestamos_externos_devueltos = PersonaPrestamo.query.filter_by(estado='devuelto').count()
+        total_prestamos_devueltos = prestamos_devueltos + prestamos_externos_devueltos
+        
+        # Préstamos vencidos
+        now = datetime.utcnow()
+        prestamos_vencidos = Prestamo.query.filter(
+            Prestamo.estado == 'activo',
+            Prestamo.fecha_devolucion_esperada < now
+        ).count()
+        prestamos_externos_vencidos = PersonaPrestamo.query.filter(
+            PersonaPrestamo.estado == 'activo',
+            PersonaPrestamo.fecha_devolucion_esperada < now
+        ).count()
+        total_prestamos_vencidos = prestamos_vencidos + prestamos_externos_vencidos
+        
+        # Top 5 libros más prestados
+        libros_mas_prestados = db.session.query(
+            Libro.titulo,
+            db.func.count(Prestamo.id).label('total_prestamos')
+        ).join(Prestamo, Libro.id == Prestamo.libro_id).group_by(Libro.id).order_by(
+            db.func.count(Prestamo.id).desc()
+        ).limit(5).all()
+        
+        # Top 5 miembros más activos
+        miembros_mas_activos = db.session.query(
+            Miembro.nombres,
+            Miembro.apellidos,
+            db.func.count(Prestamo.id).label('total_prestamos')
+        ).join(Prestamo, Miembro.id == Prestamo.usuario_id).group_by(Miembro.id).order_by(
+            db.func.count(Prestamo.id).desc()
+        ).limit(5).all()
+        
+        return render_template('admin/estadisticas.html',
+                             total_libros=total_libros,
+                             libros_disponibles=libros_disponibles,
+                             libros_prestados=libros_prestados,
+                             total_miembros=total_miembros,
+                             miembros_activos=miembros_activos,
+                             total_prestamos_activos=total_prestamos_activos,
+                             total_prestamos_devueltos=total_prestamos_devueltos,
+                             total_prestamos_vencidos=total_prestamos_vencidos,
+                             libros_mas_prestados=libros_mas_prestados,
+                             miembros_mas_activos=miembros_mas_activos)
+    except Exception as e:
+        print(f"Error al cargar estadísticas: {str(e)}")
+        flash('Error al cargar las estadísticas', 'danger')
+        return redirect(url_for('admin'))
+
+@app.route('/api/estadisticas/prestamos')
+@admin_required
+def api_estadisticas_prestamos():
+    """API para obtener datos de préstamos por período"""
+    periodo = request.args.get('periodo', 'mes')  # semana, mes, año
+    
+    try:
+        now = datetime.utcnow()
+        
+        if periodo == 'semana':
+            # Últimas 4 semanas
+            fechas = []
+            datos_internos = []
+            datos_externos = []
+            
+            for i in range(4):
+                fecha_inicio = now - timedelta(weeks=i+1)
+                fecha_fin = now - timedelta(weeks=i)
+                
+                prestamos_internos = Prestamo.query.filter(
+                    Prestamo.fecha_prestamo >= fecha_inicio,
+                    Prestamo.fecha_prestamo < fecha_fin
+                ).count()
+                
+                prestamos_externos = PersonaPrestamo.query.filter(
+                    PersonaPrestamo.fecha_prestamo >= fecha_inicio,
+                    PersonaPrestamo.fecha_prestamo < fecha_fin
+                ).count()
+                
+                fechas.append(fecha_inicio.strftime('%d/%m'))
+                datos_internos.append(prestamos_internos)
+                datos_externos.append(prestamos_externos)
+            
+            fechas.reverse()
+            datos_internos.reverse()
+            datos_externos.reverse()
+            
+        elif periodo == 'mes':
+            # Últimos 12 meses
+            fechas = []
+            datos_internos = []
+            datos_externos = []
+            
+            for i in range(12):
+                fecha_inicio = now.replace(day=1) - timedelta(days=30*i)
+                fecha_fin = fecha_inicio.replace(day=1) + timedelta(days=30)
+                
+                prestamos_internos = Prestamo.query.filter(
+                    Prestamo.fecha_prestamo >= fecha_inicio,
+                    Prestamo.fecha_prestamo < fecha_fin
+                ).count()
+                
+                prestamos_externos = PersonaPrestamo.query.filter(
+                    PersonaPrestamo.fecha_prestamo >= fecha_inicio,
+                    PersonaPrestamo.fecha_prestamo < fecha_fin
+                ).count()
+                
+                fechas.append(fecha_inicio.strftime('%b %Y'))
+                datos_internos.append(prestamos_internos)
+                datos_externos.append(prestamos_externos)
+            
+            fechas.reverse()
+            datos_internos.reverse()
+            datos_externos.reverse()
+            
+        else:  # año
+            # Últimos 5 años
+            fechas = []
+            datos_internos = []
+            datos_externos = []
+            
+            for i in range(5):
+                año = now.year - i
+                fecha_inicio = datetime(año, 1, 1)
+                fecha_fin = datetime(año + 1, 1, 1)
+                
+                prestamos_internos = Prestamo.query.filter(
+                    Prestamo.fecha_prestamo >= fecha_inicio,
+                    Prestamo.fecha_prestamo < fecha_fin
+                ).count()
+                
+                prestamos_externos = PersonaPrestamo.query.filter(
+                    PersonaPrestamo.fecha_prestamo >= fecha_inicio,
+                    PersonaPrestamo.fecha_prestamo < fecha_fin
+                ).count()
+                
+                fechas.append(str(año))
+                datos_internos.append(prestamos_internos)
+                datos_externos.append(prestamos_externos)
+            
+            fechas.reverse()
+            datos_internos.reverse()
+            datos_externos.reverse()
+        
+        return jsonify({
+            'fechas': fechas,
+            'prestamos_internos': datos_internos,
+            'prestamos_externos': datos_externos,
+            'periodo': periodo
+        })
+        
+    except Exception as e:
+        print(f"Error al obtener estadísticas de préstamos: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/estadisticas/categorias')
+@admin_required
+def api_estadisticas_categorias():
+    """API para obtener estadísticas por categorías/materias"""
+    try:
+        # Obtener todas las materias únicas
+        materias = db.session.query(Libro.materias).distinct().all()
+        materias = [m[0] for m in materias if m[0] and m[0].strip()]
+        
+        datos_categorias = []
+        for materia in materias[:10]:  # Top 10 categorías
+            total_libros = Libro.query.filter(Libro.materias == materia).count()
+            libros_prestados = db.session.query(Libro).join(Prestamo, Libro.id == Prestamo.libro_id).filter(
+                Libro.materias == materia,
+                Prestamo.estado == 'activo'
+            ).count()
+            
+            datos_categorias.append({
+                'materia': materia,
+                'total_libros': total_libros,
+                'libros_prestados': libros_prestados
+            })
+        
+        # Ordenar por total de libros
+        datos_categorias.sort(key=lambda x: x['total_libros'], reverse=True)
+        
+        return jsonify({
+            'categorias': [d['materia'] for d in datos_categorias],
+            'total_libros': [d['total_libros'] for d in datos_categorias],
+            'libros_prestados': [d['libros_prestados'] for d in datos_categorias]
+        })
+        
+    except Exception as e:
+        print(f"Error al obtener estadísticas por categorías: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/prestamo/<int:prestamo_id>/detalles')
+@admin_required
+def detalles_prestamo(prestamo_id):
+    tipo = request.args.get('tipo', 'PrestamoInterno')
+    
+    try:
+        if tipo == 'PrestamoInterno':
+            prestamo = PrestamoInterno.query.get_or_404(prestamo_id)
+            if not prestamo:
+                flash('Préstamo no encontrado', 'danger')
+                return redirect(url_for('admin_prestamos'))
+            
+            return render_template('admin/detalles_prestamo.html', 
+                                 prestamo=prestamo, 
+                                 tipo='interno',
+                                 miembro=prestamo.miembro,
+                                 libro=prestamo.libro)
+        elif tipo == 'Prestamo':
+            prestamo = Prestamo.query.get_or_404(prestamo_id)
+            if not prestamo:
+                flash('Préstamo no encontrado', 'danger')
+                return redirect(url_for('admin_prestamos'))
+            
+            return render_template('admin/detalles_prestamo.html', 
+                                 prestamo=prestamo, 
+                                 tipo='usuario',
+                                 usuario=prestamo.usuario,
+                                 libro=prestamo.libro)
+        else:  # PersonaPrestamo
+            prestamo = PersonaPrestamo.query.get_or_404(prestamo_id)
+            if not prestamo:
+                flash('Préstamo no encontrado', 'danger')
+                return redirect(url_for('admin_prestamos'))
+            
+            return render_template('admin/detalles_prestamo.html', 
+                                 prestamo=prestamo, 
+                                 tipo='externo',
+                                 libro=prestamo.libro)
+    except Exception as e:
+        print(f"Error al obtener detalles del préstamo: {str(e)}")
+        flash('Error al cargar los detalles del préstamo', 'danger')
+        return redirect(url_for('admin_prestamos'))
+
+@app.route('/admin/prestamo/devolver/interno/<int:prestamo_id>', methods=['POST'])
+@admin_required
+def devolver_libro_interno(prestamo_id):
+    try:
+        prestamo = db.session.get(PrestamoInterno, prestamo_id)
+        if not prestamo:
+            flash('Préstamo no encontrado', 'danger')
+            return redirect(url_for('admin_prestamos'))
+            
+        if prestamo.estado == 'activo':
+            prestamo.marcar_como_devuelto()
+            db.session.commit()
+            flash('Libro devuelto exitosamente', 'success')
+        else:
+            flash('Este libro ya ha sido devuelto', 'warning')
+    except Exception as e:
+        print(f"Error al devolver libro interno: {str(e)}")
+        db.session.rollback()
+        flash('Error al devolver el libro', 'danger')
+    return redirect(url_for('admin_prestamos'))
+
+@app.route('/seleccionar-tipo-prestamo-usuario/<int:libro_id>')
+@login_required
+def seleccionar_tipo_prestamo_usuario(libro_id):
+    libro = Libro.query.get_or_404(libro_id)
+    
+    if not libro.disponible:
+        flash('Este libro no está disponible para préstamo', 'warning')
+        return redirect(url_for('detalle_libro', id=libro.id))
+    
+    return render_template('seleccionar_tipo_prestamo_usuario.html', libro=libro)
+
+@app.route('/fichas-multiples')
+@admin_required
+def fichas_multiples():
+    """Vista para imprimir múltiples fichas bibliográficas en una página"""
+    try:
+        # Obtener todos los libros ordenados por título
+        libros = Libro.query.order_by(Libro.titulo).all()
+        
+        return render_template('fichas_multiples.html', libros=libros)
+    except Exception as e:
+        print(f"Error al cargar fichas múltiples: {str(e)}")
+        flash('Error al cargar las fichas', 'danger')
+        return redirect(url_for('admin'))
 
 if __name__ == '__main__':
     app.run(debug=True)

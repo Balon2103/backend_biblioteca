@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Prestar Libro</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if libro.portada_url and 'image_not_available' not in libro.portada_url %}
+                                <img src="{{ libro.portada_url }}" class="img-fluid rounded" alt="Portada de {{ libro.titulo }}">
+                            {% else %}
+                                <div class="bg-light rounded p-3 text-center">
+                                    <i class="fas fa-book fa-3x text-muted"></i>
+                                    <p class="mt-2 text-muted">Portada no disponible</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h5 class="card-title">{{ libro.titulo }}</h5>
+                            <p class="card-text">
+                                <strong>Autor:</strong> {{ libro.autor }}<br>
+                                <strong>ISBN:</strong> {{ libro.isbn }}<br>
+                                <strong>Categoría:</strong> {{ libro.categoria }}<br>
+                                <strong>Disponibles:</strong> {{ libro.cantidad }}
+                            </p>
+                            <form method="POST">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    El préstamo será por 15 días a partir de hoy.
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check me-1"></i> Confirmar Préstamo
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

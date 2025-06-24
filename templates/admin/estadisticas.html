@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}Estadísticas de la Biblioteca{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Estadísticas de la Biblioteca
+                </h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ url_for('admin') }}">Administración</a></li>
+                        <li class="breadcrumb-item active">Estadísticas</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de estadísticas generales -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total de Libros
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_libros }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-book fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Libros Disponibles
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ libros_disponibles }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Libros Prestados
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ libros_prestados }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hand-holding fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Miembros Activos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ miembros_activos }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas de préstamos -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Préstamos Activos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_prestamos_activos }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Préstamos Devueltos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_prestamos_devueltos }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-undo fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Préstamos Vencidos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_prestamos_vencidos }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Miembros
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_miembros }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-friends fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficas de préstamos -->
+    <div class="row mb-4">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Préstamos por Período</h6>
+                    <div class="dropdown no-arrow">
+                        <select id="periodoSelect" class="form-select form-select-sm">
+                            <option value="semana">Últimas 4 Semanas</option>
+                            <option value="mes" selected>Últimos 12 Meses</option>
+                            <option value="año">Últimos 5 Años</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="graficaPrestamos" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Préstamos por Categorías</h6>
+                </div>
+                <div class="card-body">
+                    <div id="graficaCategorias" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top libros y miembros -->
+    <div class="row">
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top 5 - Libros Más Prestados</h6>
+                </div>
+                <div class="card-body">
+                    {% if libros_mas_prestados %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Libro</th>
+                                        <th>Total Préstamos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for libro in libros_mas_prestados %}
+                                    <tr>
+                                        <td>{{ libro.titulo[:50] }}{% if libro.titulo|length > 50 %}...{% endif %}</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary">{{ libro.total_prestamos }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No hay datos de préstamos disponibles.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top 5 - Miembros Más Activos</h6>
+                </div>
+                <div class="card-body">
+                    {% if miembros_mas_activos %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Miembro</th>
+                                        <th>Total Préstamos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for miembro in miembros_mas_activos %}
+                                    <tr>
+                                        <td>{{ miembro.nombres }} {{ miembro.apellidos }}</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success">{{ miembro.total_prestamos }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No hay datos de miembros disponibles.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts para las gráficas -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar gráfica de préstamos
+    cargarGraficaPrestamos('mes');
+    
+    // Cargar gráfica de categorías
+    cargarGraficaCategorias();
+    
+    // Event listener para cambio de período
+    document.getElementById('periodoSelect').addEventListener('change', function() {
+        cargarGraficaPrestamos(this.value);
+    });
+});
+
+function cargarGraficaPrestamos(periodo) {
+    fetch(`/api/estadisticas/prestamos?periodo=${periodo}`)
+        .then(response => response.json())
+        .then(data => {
+            const trace1 = {
+                x: data.fechas,
+                y: data.prestamos_internos,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Préstamos Internos',
+                line: {color: '#4e73df'},
+                marker: {color: '#4e73df'}
+            };
+            
+            const trace2 = {
+                x: data.fechas,
+                y: data.prestamos_externos,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Préstamos Externos',
+                line: {color: '#1cc88a'},
+                marker: {color: '#1cc88a'}
+            };
+            
+            const layout = {
+                title: 'Evolución de Préstamos',
+                xaxis: {title: 'Período'},
+                yaxis: {title: 'Número de Préstamos'},
+                hovermode: 'closest',
+                legend: {orientation: 'h', y: -0.2}
+            };
+            
+            Plotly.newPlot('graficaPrestamos', [trace1, trace2], layout, {responsive: true});
+        })
+        .catch(error => {
+            console.error('Error al cargar gráfica de préstamos:', error);
+            document.getElementById('graficaPrestamos').innerHTML = '<p class="text-muted">Error al cargar los datos</p>';
+        });
+}
+
+function cargarGraficaCategorias() {
+    fetch('/api/estadisticas/categorias')
+        .then(response => response.json())
+        .then(data => {
+            const trace = {
+                x: data.categorias,
+                y: data.total_libros,
+                type: 'bar',
+                name: 'Total Libros',
+                marker: {color: '#4e73df'}
+            };
+            
+            const trace2 = {
+                x: data.categorias,
+                y: data.libros_prestados,
+                type: 'bar',
+                name: 'Libros Prestados',
+                marker: {color: '#1cc88a'}
+            };
+            
+            const layout = {
+                title: 'Libros por Categoría',
+                xaxis: {title: 'Categorías'},
+                yaxis: {title: 'Número de Libros'},
+                barmode: 'group',
+                legend: {orientation: 'h', y: -0.2}
+            };
+            
+            Plotly.newPlot('graficaCategorias', [trace, trace2], layout, {responsive: true});
+        })
+        .catch(error => {
+            console.error('Error al cargar gráfica de categorías:', error);
+            document.getElementById('graficaCategorias').innerHTML = '<p class="text-muted">Error al cargar los datos</p>';
+        });
+}
+</script>
+{% endblock %} 
