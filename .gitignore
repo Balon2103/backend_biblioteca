@@ -35,6 +35,9 @@ ENV/
 *.db
 *.sqlite3
 
+# Permitir la base de datos principal
+!instance/biblioteca.db
+
 # Logs
 *.log
 
