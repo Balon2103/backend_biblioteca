@@ -12,23 +12,28 @@ db.init_app(app)
 
 # Mapea aquí los nombres de las columnas del Excel a los campos del modelo Libro
 COLUMN_MAP = {
-    'titulo': 'titulo',
-    'autor': 'autor',
-    'cota': 'cota',
-    'verificacion': 'verificacion',
-    'anio_edicion': 'anio_edicion',
-    'medidas': 'medidas',
-    'num_paginas': 'num_paginas',
-    'ciudad': 'ciudad',
-    'editorial': 'editorial',
-    'coleccion': 'coleccion',
-    'materias': 'materias',
-    'caract_formato': 'caract_formato',
-    'cant_ejemplares': 'cant_ejemplares',
-    'tomos': 'tomos',
+    'Título ': 'titulo',
+    'Autor': 'autor',
+    'COTA': 'cota',
+    'Verificación': 'verificacion',
+    'Año de edicion ': 'anio_edicion',
+    'Medidas ': 'medidas',
+    'Num. Paginas': 'num_paginas',
+    'Ciudad': 'ciudad',
+    'Editorial': 'editorial',
+    'Colección ': 'coleccion',
+    'Materias': 'materias',
+    'Caract.Formato ': 'caract_formato',
+    'Cant. Ejemplares': 'cant_ejemplares',
+    'Tomos': 'tomos',
 }
 
 with app.app_context():
+    # Borrar todos los libros existentes antes de importar
+    print("Eliminando libros existentes...")
+    Libro.query.delete()
+    db.session.commit()
+
     # Leer el archivo Excel
     df = pd.read_excel('Inventario Bibliografico.xlsx')
     print(f"Columnas encontradas en el Excel: {list(df.columns)}")
@@ -38,6 +43,13 @@ with app.app_context():
 
     # Rellenar NaN con string vacío
     df = df.fillna('')
+
+    # Filtrar solo filas con título no vacío
+    df = df[df['titulo'].str.strip() != '']
+
+    # Mostrar una muestra de los datos a importar
+    print("Ejemplo de libros a importar:")
+    print(df.head(5).to_dict(orient='records'))
 
     # Insertar libros
     count = 0
