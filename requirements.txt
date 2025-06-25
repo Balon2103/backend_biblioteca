@@ -9,3 +9,5 @@ python-dotenv==1.0.0
 matplotlib==3.7.2
 seaborn==0.12.2
 plotly==5.15.0
+setuptools>=65.0.0
+wheel
