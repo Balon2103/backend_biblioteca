@@ -73,4 +73,7 @@ Thumbs.db
 Inventario Bibliografico.xlsx
 
 # Configuraciones locales o base de datos en instancia
-instance/
+-instance/
+!instance/
+!instance/biblioteca.db
+!instance/.keep
