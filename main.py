@@ -15,7 +15,7 @@ app = Flask(__name__,
             template_folder='templates',
             static_folder='static')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'tu_clave_secreta_aqui')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/biblioteca.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Inicializar la base de datos
