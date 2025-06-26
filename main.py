@@ -302,9 +302,9 @@ def admin():
             (Libro.titulo.ilike(f'%{query}%')) |
             (Libro.autor.ilike(f'%{query}%')) |
             (Libro.editorial.ilike(f'%{query}%'))
-        ).paginate(page=page, per_page=per_page)
+        ).order_by(Libro.titulo).paginate(page=page, per_page=per_page)
     else:
-        libros = Libro.query.paginate(page=page, per_page=per_page)
+        libros = Libro.query.order_by(Libro.titulo).paginate(page=page, per_page=per_page)
     
     return render_template('admin/index.html', libros=libros, query=query)
 
