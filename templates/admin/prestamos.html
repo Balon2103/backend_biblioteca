@@ -2,7 +2,14 @@
 
 {% block content %}
 <div class="container">
-    <h2 class="mb-4">Gestión de Préstamos</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gestión de Préstamos</h2>
+        <div>
+            <a href="{{ url_for('verificar_prestamos') }}" class="btn btn-warning">
+                <i class="fas fa-check-circle"></i> Verificar Préstamos
+            </a>
+        </div>
+    </div>
 
     <!-- Préstamos Activos -->
     <div class="card mb-4">
@@ -174,4 +181,26 @@
         </div>
     </div>
 </div>
+
+<script>
+// Forzar recarga de la página si hay mensajes flash para evitar problemas de caché
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar si hay mensajes flash
+    const flashMessages = document.querySelectorAll('.alert');
+    if (flashMessages.length > 0) {
+        // Si hay mensajes flash, recargar la página después de 2 segundos
+        setTimeout(function() {
+            window.location.reload();
+        }, 2000);
+    }
+    
+    // Agregar timestamp a los enlaces para evitar caché
+    const links = document.querySelectorAll('a[href*="admin/prestamos"]');
+    links.forEach(function(link) {
+        if (!link.href.includes('timestamp')) {
+            link.href += (link.href.includes('?') ? '&' : '?') + 'timestamp=' + Date.now();
+        }
+    });
+});
+</script>
 {% endblock %} 

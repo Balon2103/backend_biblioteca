@@ -701,9 +701,9 @@ def admin_prestamos():
         # Verificar y corregir libros no disponibles sin préstamos activos
         libros_no_disponibles = Libro.query.filter_by(disponible=False).all()
         for libro in libros_no_disponibles:
-            prestamo_activo = PrestamoInterno.query.filter_by(libro_id=libro.id, estado='activo').first()
-            prestamo_externo_activo = PersonaPrestamo.query.filter_by(libro_id=libro.id, estado='activo').first()
-            if not prestamo_activo and not prestamo_externo_activo:
+            prestamo_activo_interno = PrestamoInterno.query.filter_by(libro_id=libro.id, estado='activo').first()
+            prestamo_activo_externo = PersonaPrestamo.query.filter_by(libro_id=libro.id, estado='activo').first()
+            if not prestamo_activo_interno and not prestamo_activo_externo:
                 print(f"Corrigiendo libro no disponible sin préstamo activo: {libro.titulo}")
                 libro.disponible = True
                 db.session.commit()
@@ -721,11 +721,54 @@ def admin_prestamos():
                              prestamos_externos=prestamos_externos,
                              historial_internos=historial_internos,
                              historial_externos=historial_externos,
-                             now=now)
+                             now=now,
+                             timestamp=datetime.utcnow().timestamp())
     except Exception as e:
         print(f"Error en la ruta de gestión de préstamos: {str(e)}")
         flash('Error al cargar los préstamos', 'danger')
         return redirect(url_for('admin'))
+
+@app.route('/admin/verificar-prestamos')
+@admin_required
+def verificar_prestamos():
+    """Función para verificar y corregir inconsistencias en los préstamos"""
+    try:
+        cambios_realizados = []
+        
+        # Verificar libros marcados como no disponibles sin préstamos activos
+        libros_no_disponibles = Libro.query.filter_by(disponible=False).all()
+        for libro in libros_no_disponibles:
+            prestamo_activo_interno = PrestamoInterno.query.filter_by(libro_id=libro.id, estado='activo').first()
+            prestamo_activo_externo = PersonaPrestamo.query.filter_by(libro_id=libro.id, estado='activo').first()
+            
+            if not prestamo_activo_interno and not prestamo_activo_externo:
+                libro.disponible = True
+                cambios_realizados.append(f"Libro '{libro.titulo}' marcado como disponible (no tenía préstamos activos)")
+        
+        # Verificar libros marcados como disponibles con préstamos activos
+        libros_disponibles = Libro.query.filter_by(disponible=True).all()
+        for libro in libros_disponibles:
+            prestamo_activo_interno = PrestamoInterno.query.filter_by(libro_id=libro.id, estado='activo').first()
+            prestamo_activo_externo = PersonaPrestamo.query.filter_by(libro_id=libro.id, estado='activo').first()
+            
+            if prestamo_activo_interno or prestamo_activo_externo:
+                libro.disponible = False
+                cambios_realizados.append(f"Libro '{libro.titulo}' marcado como no disponible (tenía préstamos activos)")
+        
+        if cambios_realizados:
+            db.session.commit()
+            flash(f'Se realizaron {len(cambios_realizados)} correcciones en la base de datos', 'info')
+            for cambio in cambios_realizados:
+                print(f"Corrección: {cambio}")
+        else:
+            flash('No se encontraron inconsistencias en los préstamos', 'success')
+            
+    except Exception as e:
+        print(f"Error al verificar préstamos: {str(e)}")
+        db.session.rollback()
+        flash('Error al verificar los préstamos', 'danger')
+    
+    return redirect(url_for('admin_prestamos'))
 
 @app.route('/admin/prestamo/devolver/externo/<int:prestamo_id>', methods=['POST'])
 @admin_required
@@ -1176,44 +1219,89 @@ def estadisticas():
         total_miembros = Miembro.query.count()
         miembros_activos = Miembro.query.filter_by(estado='activo').count()
         
-        # Estadísticas de préstamos
+        # Estadísticas de préstamos - CORREGIDO para incluir todos los tipos
         prestamos_activos = Prestamo.query.filter_by(estado='activo').count()
+        prestamos_internos_activos = PrestamoInterno.query.filter_by(estado='activo').count()
         prestamos_externos_activos = PersonaPrestamo.query.filter_by(estado='activo').count()
-        total_prestamos_activos = prestamos_activos + prestamos_externos_activos
+        total_prestamos_activos = prestamos_activos + prestamos_internos_activos + prestamos_externos_activos
         
-        # Préstamos devueltos
+        # Préstamos devueltos - CORREGIDO para incluir todos los tipos
         prestamos_devueltos = Prestamo.query.filter_by(estado='devuelto').count()
+        prestamos_internos_devueltos = PrestamoInterno.query.filter_by(estado='devuelto').count()
         prestamos_externos_devueltos = PersonaPrestamo.query.filter_by(estado='devuelto').count()
-        total_prestamos_devueltos = prestamos_devueltos + prestamos_externos_devueltos
+        total_prestamos_devueltos = prestamos_devueltos + prestamos_internos_devueltos + prestamos_externos_devueltos
         
-        # Préstamos vencidos
+        # Préstamos vencidos - CORREGIDO para incluir todos los tipos
         now = datetime.utcnow()
         prestamos_vencidos = Prestamo.query.filter(
             Prestamo.estado == 'activo',
             Prestamo.fecha_devolucion_esperada < now
         ).count()
+        prestamos_internos_vencidos = PrestamoInterno.query.filter(
+            PrestamoInterno.estado == 'activo',
+            PrestamoInterno.fecha_devolucion_esperada < now
+        ).count()
         prestamos_externos_vencidos = PersonaPrestamo.query.filter(
             PersonaPrestamo.estado == 'activo',
             PersonaPrestamo.fecha_devolucion_esperada < now
         ).count()
-        total_prestamos_vencidos = prestamos_vencidos + prestamos_externos_vencidos
+        total_prestamos_vencidos = prestamos_vencidos + prestamos_internos_vencidos + prestamos_externos_vencidos
         
-        # Top 5 libros más prestados
-        libros_mas_prestados = db.session.query(
+        # Top 5 libros más prestados - CORREGIDO para incluir todos los tipos
+        # Combinar préstamos de todos los tipos
+        prestamos_todos = db.session.query(
             Libro.titulo,
             db.func.count(Prestamo.id).label('total_prestamos')
-        ).join(Prestamo, Libro.id == Prestamo.libro_id).group_by(Libro.id).order_by(
-            db.func.count(Prestamo.id).desc()
-        ).limit(5).all()
+        ).join(Prestamo, Libro.id == Prestamo.libro_id).group_by(Libro.id)
         
-        # Top 5 miembros más activos
+        prestamos_internos_todos = db.session.query(
+            Libro.titulo,
+            db.func.count(PrestamoInterno.id).label('total_prestamos')
+        ).join(PrestamoInterno, Libro.id == PrestamoInterno.libro_id).group_by(Libro.id)
+        
+        prestamos_externos_todos = db.session.query(
+            Libro.titulo,
+            db.func.count(PersonaPrestamo.id).label('total_prestamos')
+        ).join(PersonaPrestamo, Libro.id == PersonaPrestamo.libro_id).group_by(Libro.id)
+        
+        # Combinar todos los resultados
+        from collections import defaultdict
+        libros_contador = defaultdict(int)
+        
+        for titulo, count in prestamos_todos.all():
+            libros_contador[titulo] += count
+        for titulo, count in prestamos_internos_todos.all():
+            libros_contador[titulo] += count
+        for titulo, count in prestamos_externos_todos.all():
+            libros_contador[titulo] += count
+        
+        # Ordenar por total de préstamos y convertir a formato esperado por el template
+        libros_mas_prestados = []
+        for titulo, count in sorted(libros_contador.items(), key=lambda x: x[1], reverse=True)[:5]:
+            # Crear un objeto con los atributos que espera el template
+            libro_obj = type('Libro', (), {'titulo': titulo, 'total_prestamos': count})()
+            libros_mas_prestados.append(libro_obj)
+        
+        # Top 5 miembros más activos - CORREGIDO para incluir PrestamoInterno
         miembros_mas_activos = db.session.query(
             Miembro.nombres,
             Miembro.apellidos,
-            db.func.count(Prestamo.id).label('total_prestamos')
-        ).join(Prestamo, Miembro.id == Prestamo.usuario_id).group_by(Miembro.id).order_by(
-            db.func.count(Prestamo.id).desc()
+            db.func.count(PrestamoInterno.id).label('total_prestamos')
+        ).join(PrestamoInterno, Miembro.id == PrestamoInterno.miembro_id).group_by(Miembro.id).order_by(
+            db.func.count(PrestamoInterno.id).desc()
         ).limit(5).all()
+        
+        # Imprimir información de depuración
+        print(f"=== ESTADÍSTICAS DEBUG ===")
+        print(f"Total libros: {total_libros}")
+        print(f"Libros disponibles: {libros_disponibles}")
+        print(f"Libros prestados: {libros_prestados}")
+        print(f"Préstamos activos (Prestamo): {prestamos_activos}")
+        print(f"Préstamos activos (PrestamoInterno): {prestamos_internos_activos}")
+        print(f"Préstamos activos (PersonaPrestamo): {prestamos_externos_activos}")
+        print(f"Total préstamos activos: {total_prestamos_activos}")
+        print(f"Total préstamos devueltos: {total_prestamos_devueltos}")
+        print(f"Total préstamos vencidos: {total_prestamos_vencidos}")
         
         return render_template('admin/estadisticas.html',
                              total_libros=total_libros,
@@ -1419,21 +1507,37 @@ def detalles_prestamo(prestamo_id):
 @admin_required
 def devolver_libro_interno(prestamo_id):
     try:
+        print(f"Intentando devolver préstamo interno ID: {prestamo_id}")
         prestamo = db.session.get(PrestamoInterno, prestamo_id)
+        
         if not prestamo:
+            print(f"Préstamo interno no encontrado: {prestamo_id}")
             flash('Préstamo no encontrado', 'danger')
             return redirect(url_for('admin_prestamos'))
+        
+        print(f"Estado actual del préstamo: {prestamo.estado}")
+        print(f"Libro: {prestamo.libro.titulo}")
+        print(f"Disponible antes: {prestamo.libro.disponible}")
             
         if prestamo.estado == 'activo':
             prestamo.marcar_como_devuelto()
+            print(f"Estado después de marcar como devuelto: {prestamo.estado}")
+            print(f"Disponible después: {prestamo.libro.disponible}")
+            print(f"Fecha devolución real: {prestamo.fecha_devolucion_real}")
+            
             db.session.commit()
+            print("Cambios guardados en la base de datos")
             flash('Libro devuelto exitosamente', 'success')
         else:
+            print(f"Préstamo ya no está activo, estado: {prestamo.estado}")
             flash('Este libro ya ha sido devuelto', 'warning')
+            
     except Exception as e:
         print(f"Error al devolver libro interno: {str(e)}")
         db.session.rollback()
         flash('Error al devolver el libro', 'danger')
+    
+    # Forzar recarga de la página
     return redirect(url_for('admin_prestamos'))
 
 @app.route('/seleccionar-tipo-prestamo-usuario/<int:libro_id>')
