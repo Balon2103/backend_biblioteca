@@ -100,6 +100,10 @@
                                     <td>{{ miembro.fecha_registro.strftime('%d/%m/%Y') }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
+                                            <a href="{{ url_for('prestamos_miembro', id=miembro.id) }}" 
+                                               class="btn btn-sm btn-primary" title="Ver Préstamos">
+                                                <i class="fas fa-book"></i>
+                                            </a>
                                             <a href="{{ url_for('ver_carnet', id=miembro.id) }}" 
                                                class="btn btn-sm btn-info" title="Ver Carnet">
                                                 <i class="fas fa-id-card"></i>
@@ -112,19 +116,17 @@
                                                class="btn btn-sm btn-warning" title="Editar">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <form method="POST" action="{{ url_for('eliminar_miembro', id=miembro.id) }}" style="display: inline;">
-                                                <button type="submit" class="btn btn-sm btn-danger" 
-                                                        onclick="return confirm('¿Está seguro de que desea eliminar este miembro? Esta acción no se puede deshacer.')" 
-                                                        title="Eliminar">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-danger" 
+                                                    onclick="eliminarMiembro({{ miembro.id }}, '{{ miembro.nombre_completo }}')" 
+                                                    title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                                 {% else %}
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted">
+                                    <td colspan="9" class="text-center text-muted">
                                         <i class="fas fa-users fa-3x mb-3"></i>
                                         <br>
                                         No se encontraron miembros
@@ -182,4 +184,19 @@
         </div>
     </div>
 </div>
+
+<!-- Formulario oculto para eliminación -->
+<form id="formEliminar" method="POST" style="display: none;">
+    <input type="hidden" id="miembroIdEliminar" name="miembro_id">
+</form>
+
+<script>
+function eliminarMiembro(miembroId, nombreMiembro) {
+    if (confirm('¿Seguro que desea eliminar a ' + nombreMiembro + '? Esta acción no se puede deshacer.')) {
+        document.getElementById('miembroIdEliminar').value = miembroId;
+        document.getElementById('formEliminar').action = '/miembros/' + miembroId + '/eliminar';
+        document.getElementById('formEliminar').submit();
+    }
+}
+</script>
 {% endblock %} 

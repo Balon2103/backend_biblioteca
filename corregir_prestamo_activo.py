@@ -1,155 +1,82 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
-Script para encontrar y corregir préstamos que están marcados como activos 
-cuando deberían estar como devueltos
+Script simple para corregir préstamos activos
 """
 
 from main import app, db
-from models import Libro, Prestamo, PrestamoInterno, PersonaPrestamo, Miembro, Usuario
+from models import PrestamoInterno, Libro
 from datetime import datetime
 
 def corregir_prestamo_activo():
+    """Corrige el préstamo activo marcándolo como devuelto"""
+    
     with app.app_context():
         print("=== CORRECCIÓN DE PRÉSTAMO ACTIVO ===")
         
-        # Buscar préstamos activos en todos los modelos
-        prestamos_activos = Prestamo.query.filter_by(estado='activo').all()
-        prestamos_internos_activos = PrestamoInterno.query.filter_by(estado='activo').all()
-        prestamos_externos_activos = PersonaPrestamo.query.filter_by(estado='activo').all()
+        # Buscar el préstamo activo específico
+        prestamo_activo = PrestamoInterno.query.filter_by(id=3, estado='activo').first()
         
-        print(f"📋 PRÉSTAMOS ACTIVOS ENCONTRADOS:")
-        print(f"   - Prestamo (antiguo): {len(prestamos_activos)}")
-        print(f"   - PrestamoInterno: {len(prestamos_internos_activos)}")
-        print(f"   - PersonaPrestamo: {len(prestamos_externos_activos)}")
+        if not prestamo_activo:
+            print("No se encontró el préstamo activo con ID 3")
+            return
         
-        # Mostrar detalles de cada préstamo activo
-        for i, prestamo in enumerate(prestamos_activos, 1):
-            libro = Libro.query.get(prestamo.libro_id)
-            usuario = Usuario.query.get(prestamo.usuario_id)
-            print(f"\n{i}. PRÉSTAMO (antiguo) - ID: {prestamo.id}")
-            print(f"   Libro: {libro.titulo if libro else 'No encontrado'}")
-            print(f"   Usuario: {usuario.nombre if usuario else 'No encontrado'}")
-            print(f"   Fecha préstamo: {prestamo.fecha_prestamo}")
-            print(f"   Fecha devolución esperada: {prestamo.fecha_devolucion_esperada}")
-            print(f"   Estado: {prestamo.estado}")
-            print(f"   Libro disponible: {libro.disponible if libro else 'N/A'}")
+        print(f"Préstamo encontrado:")
+        print(f"  ID: {prestamo_activo.id}")
+        print(f"  Miembro ID: {prestamo_activo.miembro_id}")
+        print(f"  Libro ID: {prestamo_activo.libro_id}")
+        print(f"  Estado actual: {prestamo_activo.estado}")
         
-        for i, prestamo in enumerate(prestamos_internos_activos, 1):
-            libro = Libro.query.get(prestamo.libro_id)
-            miembro = Miembro.query.get(prestamo.miembro_id)
-            print(f"\n{i}. PRÉSTAMO INTERNO - ID: {prestamo.id}")
-            print(f"   Libro: {libro.titulo if libro else 'No encontrado'}")
-            print(f"   Miembro: {miembro.nombre_completo if miembro else 'No encontrado'}")
-            print(f"   Fecha préstamo: {prestamo.fecha_prestamo}")
-            print(f"   Fecha devolución esperada: {prestamo.fecha_devolucion_esperada}")
-            print(f"   Estado: {prestamo.estado}")
-            print(f"   Libro disponible: {libro.disponible if libro else 'N/A'}")
-        
-        for i, prestamo in enumerate(prestamos_externos_activos, 1):
-            libro = Libro.query.get(prestamo.libro_id)
-            print(f"\n{i}. PRÉSTAMO EXTERNO - ID: {prestamo.id}")
-            print(f"   Libro: {libro.titulo if libro else 'No encontrado'}")
-            print(f"   Nombre: {prestamo.nombre}")
-            print(f"   Fecha préstamo: {prestamo.fecha_prestamo}")
-            print(f"   Fecha devolución esperada: {prestamo.fecha_devolucion_esperada}")
-            print(f"   Estado: {prestamo.estado}")
-            print(f"   Libro disponible: {libro.disponible if libro else 'N/A'}")
-        
-        # Buscar préstamos devueltos para comparar
-        prestamos_devueltos = Prestamo.query.filter_by(estado='devuelto').all()
-        prestamos_internos_devueltos = PrestamoInterno.query.filter_by(estado='devuelto').all()
-        prestamos_externos_devueltos = PersonaPrestamo.query.filter_by(estado='devuelto').all()
-        
-        print(f"\n📋 PRÉSTAMOS DEVUELTOS ENCONTRADOS:")
-        print(f"   - Prestamo (antiguo): {len(prestamos_devueltos)}")
-        print(f"   - PrestamoInterno: {len(prestamos_internos_devueltos)}")
-        print(f"   - PersonaPrestamo: {len(prestamos_externos_devueltos)}")
-        
-        # Mostrar detalles de préstamos devueltos
-        for i, prestamo in enumerate(prestamos_devueltos, 1):
-            libro = Libro.query.get(prestamo.libro_id)
-            usuario = Usuario.query.get(prestamo.usuario_id)
-            print(f"\n{i}. PRÉSTAMO DEVUELTO (antiguo) - ID: {prestamo.id}")
-            print(f"   Libro: {libro.titulo if libro else 'No encontrado'}")
-            print(f"   Usuario: {usuario.nombre if usuario else 'No encontrado'}")
-            print(f"   Fecha préstamo: {prestamo.fecha_prestamo}")
-            print(f"   Fecha devolución: {prestamo.fecha_devolucion_real}")
-            print(f"   Estado: {prestamo.estado}")
-            print(f"   Libro disponible: {libro.disponible if libro else 'N/A'}")
-        
-        for i, prestamo in enumerate(prestamos_internos_devueltos, 1):
-            libro = Libro.query.get(prestamo.libro_id)
-            miembro = Miembro.query.get(prestamo.miembro_id)
-            print(f"\n{i}. PRÉSTAMO INTERNO DEVUELTO - ID: {prestamo.id}")
-            print(f"   Libro: {libro.titulo if libro else 'No encontrado'}")
-            print(f"   Miembro: {miembro.nombre_completo if miembro else 'No encontrado'}")
-            print(f"   Fecha préstamo: {prestamo.fecha_prestamo}")
-            print(f"   Fecha devolución: {prestamo.fecha_devolucion_real}")
-            print(f"   Estado: {prestamo.estado}")
-            print(f"   Libro disponible: {libro.disponible if libro else 'N/A'}")
-        
-        # Preguntar si quiere corregir algún préstamo
-        if prestamos_activos or prestamos_internos_activos or prestamos_externos_activos:
-            print(f"\n🔧 ¿Deseas marcar algún préstamo como devuelto? (s/n): ", end="")
-            respuesta = input().lower()
+        try:
+            # Solo cambiar el estado y la fecha de devolución
+            prestamo_activo.estado = 'devuelto'
+            prestamo_activo.fecha_devolucion_real = datetime.utcnow()
             
-            if respuesta == 's':
-                print("Ingresa el tipo de préstamo (1=Prestamo, 2=PrestamoInterno, 3=PersonaPrestamo): ", end="")
-                tipo = input().strip()
-                
-                print("Ingresa el ID del préstamo: ", end="")
-                prestamo_id = int(input().strip())
-                
-                try:
-                    if tipo == '1':
-                        prestamo = Prestamo.query.get(prestamo_id)
-                        if prestamo and prestamo.estado == 'activo':
-                            prestamo.estado = 'devuelto'
-                            prestamo.fecha_devolucion_real = datetime.utcnow()
-                            libro = Libro.query.get(prestamo.libro_id)
-                            if libro:
-                                libro.disponible = True
-                            print(f"✅ Préstamo {prestamo_id} marcado como devuelto")
-                        else:
-                            print("❌ Préstamo no encontrado o ya no está activo")
-                    elif tipo == '2':
-                        prestamo = PrestamoInterno.query.get(prestamo_id)
-                        if prestamo and prestamo.estado == 'activo':
-                            prestamo.estado = 'devuelto'
-                            prestamo.fecha_devolucion_real = datetime.utcnow()
-                            libro = Libro.query.get(prestamo.libro_id)
-                            if libro:
-                                libro.disponible = True
-                            print(f"✅ Préstamo interno {prestamo_id} marcado como devuelto")
-                        else:
-                            print("❌ Préstamo interno no encontrado o ya no está activo")
-                    elif tipo == '3':
-                        prestamo = PersonaPrestamo.query.get(prestamo_id)
-                        if prestamo and prestamo.estado == 'activo':
-                            prestamo.estado = 'devuelto'
-                            prestamo.fecha_devolucion_real = datetime.utcnow()
-                            libro = Libro.query.get(prestamo.libro_id)
-                            if libro:
-                                libro.disponible = True
-                            print(f"✅ Préstamo externo {prestamo_id} marcado como devuelto")
-                        else:
-                            print("❌ Préstamo externo no encontrado o ya no está activo")
-                    else:
-                        print("❌ Tipo de préstamo inválido")
-                        return
-                    
-                    db.session.commit()
-                    print("✅ Cambios guardados en la base de datos")
-                    
-                except Exception as e:
-                    print(f"❌ Error al corregir el préstamo: {str(e)}")
-                    db.session.rollback()
-            else:
-                print("ℹ️ No se realizaron correcciones")
-        else:
-            print("✅ No hay préstamos activos para corregir")
+            # También marcar el libro como disponible
+            libro = Libro.query.get(prestamo_activo.libro_id)
+            if libro:
+                libro.disponible = True
+                print(f"  Libro marcado como disponible: {libro.titulo}")
+            
+            db.session.commit()
+            print("✅ Préstamo marcado como devuelto exitosamente")
+            
+            # Verificar el cambio
+            prestamo_verificado = PrestamoInterno.query.get(3)
+            print(f"  Estado después del cambio: {prestamo_verificado.estado}")
+            print(f"  Fecha devolución real: {prestamo_verificado.fecha_devolucion_real}")
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ Error: {str(e)}")
+
+def verificar_estado_final():
+    """Verifica el estado final de los préstamos"""
+    
+    with app.app_context():
+        print("\n=== VERIFICACIÓN FINAL ===")
         
-        print(f"\n=== FIN DE CORRECCIÓN ===")
+        # Verificar todos los préstamos del miembro
+        prestamos = PrestamoInterno.query.filter_by(miembro_id=1).all()
+        
+        print(f"Total de préstamos del miembro: {len(prestamos)}")
+        
+        for prestamo in prestamos:
+            print(f"  Préstamo ID: {prestamo.id}")
+            print(f"    Estado: {prestamo.estado}")
+            print(f"    Libro: {prestamo.libro.titulo if prestamo.libro else 'No encontrado'}")
+            print(f"    Fecha devolución real: {prestamo.fecha_devolucion_real}")
+        
+        # Verificar préstamos activos
+        prestamos_activos = PrestamoInterno.query.filter_by(miembro_id=1, estado='activo').count()
+        print(f"\nPréstamos activos restantes: {prestamos_activos}")
+        
+        if prestamos_activos == 0:
+            print("✅ El miembro ya no tiene préstamos activos")
+        else:
+            print("⚠️  Aún quedan préstamos activos")
 
 if __name__ == "__main__":
-    corregir_prestamo_activo() 
+    corregir_prestamo_activo()
+    verificar_estado_final() 

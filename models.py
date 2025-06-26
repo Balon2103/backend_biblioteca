@@ -160,14 +160,14 @@ class PrestamoInterno(db.Model):
     __tablename__ = 'prestamos_internos'
     
     id = db.Column(db.Integer, primary_key=True)
-    miembro_id = db.Column(db.Integer, db.ForeignKey('miembros.id'), nullable=False)
+    miembro_id = db.Column(db.Integer, db.ForeignKey('miembros.id', ondelete='SET NULL'), nullable=True)
     libro_id = db.Column(db.Integer, db.ForeignKey('libros.id'), nullable=False)
     fecha_prestamo = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     fecha_devolucion_esperada = db.Column(db.DateTime, nullable=False)
     fecha_devolucion_real = db.Column(db.DateTime)
     estado = db.Column(db.String(20), default='activo')  # activo, devuelto, vencido
     libro = db.relationship('Libro', backref=db.backref('prestamos_internos', lazy=True))
-    miembro = db.relationship('Miembro', backref=db.backref('prestamos_internos', lazy=True))
+    miembro = db.relationship('Miembro', backref=db.backref('prestamos_internos', lazy=True), passive_deletes=True)
     
     def __repr__(self):
         return f'<PrestamoInterno {self.id}>'

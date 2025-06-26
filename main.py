@@ -1155,25 +1155,71 @@ def editar_miembro(id):
     
     return render_template('admin/editar_miembro.html', miembro=miembro)
 
+@app.route('/miembros/<int:id>/verificar-eliminacion', methods=['POST'])
+@admin_required
+def verificar_eliminacion_miembro(id):
+    miembro = Miembro.query.get_or_404(id)
+    
+    # Verificar si el miembro tiene préstamos activos
+    prestamos_activos = PrestamoInterno.query.filter_by(miembro_id=id, estado='activo').count()
+    
+    if prestamos_activos > 0:
+        return jsonify({
+            'success': False,
+            'message': f'Esta persona no se puede eliminar ya que posee {prestamos_activos} préstamo(s) activo(s)',
+            'tiene_prestamos_activos': True
+        })
+    else:
+        return jsonify({
+            'success': True,
+            'message': '¿Seguro que desea eliminar esta persona?',
+            'tiene_prestamos_activos': False
+        })
+
 @app.route('/miembros/<int:id>/eliminar', methods=['POST'])
 @admin_required
 def eliminar_miembro(id):
-    miembro = Miembro.query.get_or_404(id)
+    print(f"=== ELIMINACIÓN WEB - MIEMBRO ID: {id} ===")
     
     try:
+        miembro = Miembro.query.get_or_404(id)
+        print(f"Miembro encontrado: {miembro.nombre_completo}")
+        
+        # Verificar préstamos activos
+        prestamos_activos = PrestamoInterno.query.filter_by(miembro_id=id, estado='activo').count()
+        print(f"Préstamos activos: {prestamos_activos}")
+        
+        if prestamos_activos > 0:
+            print("❌ NO SE PUEDE ELIMINAR - TIENE PRÉSTAMOS ACTIVOS")
+            flash(f'Esta persona no se puede eliminar ya que posee {prestamos_activos} préstamo(s) activo(s)', 'danger')
+            return redirect(url_for('miembros'))
+
+        # Eliminar todos los préstamos del miembro
+        print("Eliminando préstamos...")
+        prestamos_miembro = PrestamoInterno.query.filter_by(miembro_id=id).all()
+        for prestamo in prestamos_miembro:
+            db.session.delete(prestamo)
+        db.session.commit()
+        print("Préstamos eliminados")
+
         # Eliminar foto si existe
         if miembro.foto:
             foto_path = os.path.join(app.static_folder, miembro.foto)
             if os.path.exists(foto_path):
                 os.remove(foto_path)
-        
+
+        # Eliminar miembro
+        print("Eliminando miembro...")
         db.session.delete(miembro)
         db.session.commit()
+        print("✅ MIEMBRO ELIMINADO EXITOSAMENTE")
+        
         flash('Miembro eliminado exitosamente', 'success')
+        
     except Exception as e:
         db.session.rollback()
-        print(f"Error al eliminar miembro: {str(e)}")
-        flash('Error al eliminar el miembro', 'danger')
+        print(f"❌ ERROR: {type(e).__name__} - {str(e)}")
+        flash(f'Error al eliminar el miembro: {str(e)}', 'danger')
     
     return redirect(url_for('miembros'))
 
@@ -1210,6 +1256,16 @@ def api_miembros():
         'numero_carnet': miembro.numero_carnet,
         'estado': miembro.estado
     } for miembro in miembros])
+
+@app.route('/miembros/<int:id>/prestamos')
+@admin_required
+def prestamos_miembro(id):
+    miembro = Miembro.query.get_or_404(id)
+    
+    # Obtener todos los préstamos del miembro
+    prestamos_internos = PrestamoInterno.query.filter_by(miembro_id=id).order_by(PrestamoInterno.fecha_prestamo.desc()).all()
+    
+    return render_template('admin/prestamos_miembro.html', miembro=miembro, prestamos=prestamos_internos)
 
 # ==================== RUTAS PARA ESTADÍSTICAS ====================
 
@@ -1469,7 +1525,7 @@ def api_estadisticas_categorias():
 @app.route('/admin/prestamo/<int:prestamo_id>/detalles')
 @admin_required
 def detalles_prestamo(prestamo_id):
-    tipo = request.args.get('tipo', 'PrestamoInterno')
+    tipo = request.args.get('tipo', 'Prestamo')
     
     try:
         if tipo == 'PrestamoInterno':
@@ -1584,4 +1640,51 @@ def limpiar_nombre_archivo(nombre):
     return nombre_limpio
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        # Crear las tablas si no existen
+        with app.app_context():
+            db.create_all()
+            print("Base de datos inicializada correctamente")
+            
+            # Crear usuarios administradores si no existen
+            admin_user = Usuario.query.filter_by(username='admin').first()
+            if not admin_user:
+                admin_user = Usuario(
+                    username='admin',
+                    email='admin@biblioteca.com',
+                    nombre='Administrador',
+                    apellido='Sistema',
+                    cedula='00000000',
+                    telefono='0000000000',
+                    rol='superadmin',
+                    is_admin=True
+                )
+                admin_user.set_password('admin123')
+                db.session.add(admin_user)
+                db.session.commit()
+                print("Usuario administrador creado: admin / admin123")
+            
+            superadmin_user = Usuario.query.filter_by(username='superadmin').first()
+            if not superadmin_user:
+                superadmin_user = Usuario(
+                    username='superadmin',
+                    email='superadmin@biblioteca.com',
+                    nombre='Super',
+                    apellido='Administrador',
+                    cedula='11111111',
+                    telefono='1111111111',
+                    rol='superadmin',
+                    is_admin=True
+                )
+                superadmin_user.set_password('superadmin123')
+                db.session.add(superadmin_user)
+                db.session.commit()
+                print("Usuario superadmin creado: superadmin / superadmin123")
+                
+    except Exception as e:
+        print(f"Error al inicializar la base de datos: {str(e)}")
+        print("La aplicación continuará sin base de datos local")
+    
+    # Configuración para Render
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
