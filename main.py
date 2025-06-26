@@ -135,6 +135,7 @@ def catalogo():
     per_page = 12
     query = request.args.get('q', '')
     categoria = request.args.get('categoria', '')
+    materia_busqueda = request.args.get('materia', '')
     
     # Construir la consulta base
     libros_query = Libro.query
@@ -152,10 +153,14 @@ def catalogo():
                 Libro.autor.ilike(search_term),
                 Libro.editorial.ilike(search_term),
                 Libro.cota.ilike(search_term),
-                Libro.coleccion.ilike(search_term),
-                Libro.materias.ilike(search_term)
+                Libro.coleccion.ilike(search_term)
             )
         )
+    
+    # Aplicar búsqueda específica por materia si se especifica
+    if materia_busqueda:
+        materia_term = f'%{materia_busqueda}%'
+        libros_query = libros_query.filter(Libro.materias.ilike(materia_term))
     
     # Ordenar por título
     libros_query = libros_query.order_by(Libro.titulo)
@@ -168,7 +173,7 @@ def catalogo():
     materias = [m[0] for m in materias if m[0]]  # Filtrar valores None
     materias.sort()  # Ordenar las materias alfabéticamente
     
-    return render_template('index.html', libros=libros, query=query, categoria=categoria, materias=materias)
+    return render_template('index.html', libros=libros, query=query, categoria=categoria, materia_busqueda=materia_busqueda, materias=materias)
 
 @app.route('/libro/<int:id>')
 def detalle_libro(id):
@@ -177,7 +182,8 @@ def detalle_libro(id):
     page = request.args.get('page', 1, type=int)
     query = request.args.get('q', '')
     categoria = request.args.get('categoria', '')
-    return render_template('detalle_libro.html', libro=libro, page=page, query=query, categoria=categoria)
+    materia_busqueda = request.args.get('materia', '')
+    return render_template('detalle_libro.html', libro=libro, page=page, query=query, categoria=categoria, materia_busqueda=materia_busqueda)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

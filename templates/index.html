@@ -2,21 +2,22 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="row mb-4">
+    <div class="row mb-4 align-items-end">
         <div class="col-md-8">
             <h1 class="display-5 fw-bold text-primary">Catálogo de Libros</h1>
             <p class="text-muted">Explora nuestra colección de libros disponibles</p>
         </div>
-        <div class="col-md-4">
-            <form action="{{ url_for('catalogo') }}" method="GET" class="d-flex">
+        <div class="col-md-4 d-flex justify-content-end">
+            <form action="{{ url_for('catalogo') }}" method="GET" class="d-flex w-100" style="max-width: 100%;">
                 <div class="input-group">
-                    <select name="categoria" class="form-select" style="max-width: 150px;" onchange="this.form.submit()">
+                    <select name="categoria" class="form-select" style="max-width: 180px; min-width: 120px;" onchange="this.form.submit()">
                         <option value="">Todas las categorías</option>
+                        <option value="Materia" {% if categoria == "Materia" %}selected{% endif %}>Materia</option>
                         {% for materia in materias %}
                         <option value="{{ materia }}" {% if categoria == materia %}selected{% endif %}>{{ materia }}</option>
                         {% endfor %}
                     </select>
-                    <input type="text" name="q" class="form-control" placeholder="Buscar por título o autor..." value="{{ query }}">
+                    <input type="text" name="q" class="form-control" style="max-width: 250px; min-width: 120px;" placeholder="Buscar por título, autor, editorial, materia..." value="{{ query }}">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-search"></i>
                     </button>
@@ -86,7 +87,7 @@
                         </p>
                     </div>
                     <div class="d-flex gap-2">
-                        <a href="{{ url_for('detalle_libro', id=libro.id, page=libros.page, q=query, categoria=categoria) }}" class="btn btn-primary flex-grow-1">
+                        <a href="{{ url_for('detalle_libro', id=libro.id, page=libros.page, q=query, categoria=categoria, materia=materia_busqueda) }}" class="btn btn-primary flex-grow-1">
                             <i class="fas fa-info-circle me-1"></i> Ver detalles
                         </a>
                         {% if libro.disponible and session.get('user_id') %}
@@ -122,7 +123,7 @@
                 {# Botón Anterior #}
                 {% if libros.has_prev %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('catalogo', page=libros.prev_num, q=query, categoria=categoria) }}">
+                    <a class="page-link" href="{{ url_for('catalogo', page=libros.prev_num, q=query, categoria=categoria, materia=materia_busqueda) }}">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                 </li>
@@ -144,14 +145,14 @@
                 {% endif %}
                 {% for page_num in range(start_page, end_page + 1) %}
                 <li class="page-item {% if page_num == libros.page %}active{% endif %}">
-                    <a class="page-link" href="{{ url_for('catalogo', page=page_num, q=query, categoria=categoria) }}">{{ page_num }}</a>
+                    <a class="page-link" href="{{ url_for('catalogo', page=page_num, q=query, categoria=categoria, materia=materia_busqueda) }}">{{ page_num }}</a>
                 </li>
                 {% endfor %}
 
                 {# Botón Siguiente #}
                 {% if libros.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('catalogo', page=libros.next_num, q=query, categoria=categoria) }}">
+                    <a class="page-link" href="{{ url_for('catalogo', page=libros.next_num, q=query, categoria=categoria, materia=materia_busqueda) }}">
                         <i class="fas fa-chevron-right"></i>
                     </a>
                 </li>
