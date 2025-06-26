@@ -35,7 +35,9 @@
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 {% if libro.portada_url %}
-                <img src="{{ libro.portada_url }}" class="card-img-top" alt="Portada de {{ libro.titulo }}" style="height: 300px; object-fit: contain;">
+                <div class="portada-container">
+                    <img src="{{ libro.portada_url }}" class="card-img-top portada-clickeable" alt="Portada de {{ libro.titulo }}" style="height: 300px; object-fit: contain;" data-titulo="{{ libro.titulo }}">
+                </div>
                 {% else %}
                 <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 300px; background-color: #f8f9fa;">
                     <i class="fas fa-book fa-4x text-muted"></i>

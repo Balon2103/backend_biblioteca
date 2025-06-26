@@ -12,7 +12,9 @@
                     <div class="row">
                         <div class="col-md-4">
                             {% if libro.portada_url and 'image_not_available' not in libro.portada_url %}
-                                <img src="{{ libro.portada_url }}" class="img-fluid rounded" alt="Portada de {{ libro.titulo }}">
+                                <div class="portada-container">
+                                    <img src="{{ libro.portada_url }}" class="img-fluid rounded portada-clickeable" alt="Portada de {{ libro.titulo }}" data-titulo="{{ libro.titulo }}">
+                                </div>
                             {% else %}
                                 <div class="bg-light rounded p-3 text-center">
                                     <i class="fas fa-book fa-3x text-muted"></i>

@@ -7,7 +7,9 @@
     <div class="col-md-4">
         {% if libro.portada %}
         <div class="card">
-            <img src="{{ url_for('static', filename=libro.portada) }}" class="card-img-top" alt="Portada de {{ libro.titulo }}" style="height: 400px; object-fit: cover;">
+            <div class="portada-container">
+                <img src="{{ url_for('static', filename=libro.portada) }}" class="card-img-top portada-clickeable" alt="Portada de {{ libro.titulo }}" style="height: 400px; object-fit: cover;" data-titulo="{{ libro.titulo }}">
+            </div>
         </div>
         {% else %}
         <div class="card">
