@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from sqlalchemy import or_
 import json
+import re
 
 app = Flask(__name__, 
             template_folder='templates',
@@ -338,8 +339,9 @@ def nuevo_libro():
                     upload_folder = os.path.join(app.static_folder, 'uploads', 'portadas')
                     os.makedirs(upload_folder, exist_ok=True)
                     
-                    # Generar nombre único para la portada
-                    filename = f"portada_{libro.titulo.replace(' ', '_')}_{portada.filename}"
+                    # Guardar nueva portada
+                    titulo_limpio = limpiar_nombre_archivo(libro.titulo)
+                    filename = f"portada_{titulo_limpio}_{portada.filename}"
                     portada_path = os.path.join(upload_folder, filename)
                     portada.save(portada_path)
                     libro.portada = f"uploads/portadas/{filename}"
@@ -391,10 +393,21 @@ def editar_libro(id):
                             os.remove(portada_anterior)
                     
                     # Guardar nueva portada
-                    filename = f"portada_{libro.titulo.replace(' ', '_')}_{portada.filename}"
+                    titulo_limpio = limpiar_nombre_archivo(libro.titulo)
+                    filename = f"portada_{titulo_limpio}_{portada.filename}"
                     portada_path = os.path.join(upload_folder, filename)
                     portada.save(portada_path)
                     libro.portada = f"uploads/portadas/{filename}"
+            
+            # Manejar eliminación de portada si se marca el checkbox
+            if request.form.get('eliminar_portada') == 'on':
+                if libro.portada:
+                    # Eliminar archivo físico
+                    portada_path = os.path.join(app.static_folder, libro.portada)
+                    if os.path.exists(portada_path):
+                        os.remove(portada_path)
+                    # Limpiar referencia en la base de datos
+                    libro.portada = None
             
             db.session.commit()
             flash('Libro actualizado exitosamente', 'success')
@@ -1447,6 +1460,18 @@ def fichas_multiples():
         print(f"Error al cargar fichas múltiples: {str(e)}")
         flash('Error al cargar las fichas', 'danger')
         return redirect(url_for('admin'))
+
+def limpiar_nombre_archivo(nombre):
+    """Limpia un nombre para que sea válido como nombre de archivo"""
+    # Remover caracteres especiales que no son válidos en nombres de archivo
+    nombre_limpio = re.sub(r'[<>:"/\\|?*]', '', nombre)
+    # Reemplazar espacios y otros caracteres problemáticos
+    nombre_limpio = re.sub(r'[()]', '', nombre_limpio)
+    nombre_limpio = nombre_limpio.replace(' ', '_')
+    # Limitar la longitud
+    if len(nombre_limpio) > 100:
+        nombre_limpio = nombre_limpio[:100]
+    return nombre_limpio
 
 if __name__ == '__main__':
     app.run(debug=True)
