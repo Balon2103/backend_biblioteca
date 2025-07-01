@@ -11,6 +11,12 @@ from io import BytesIO
 from sqlalchemy import or_
 import json
 import re
+from config.email_config import init_mail
+from utils.email_service import send_password_reset_email, send_welcome_email
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
 
 app = Flask(__name__, 
             template_folder='templates',
@@ -19,8 +25,16 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'tu_clave_secreta_aqui')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Configuración para URLs fuera de contexto de request
+app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME', 'localhost:5000')
+app.config['APPLICATION_ROOT'] = os.environ.get('APPLICATION_ROOT', '/')
+app.config['PREFERRED_URL_SCHEME'] = os.environ.get('PREFERRED_URL_SCHEME', 'http')
+
 # Inicializar la base de datos
 db.init_app(app)
+
+# Inicializar el sistema de correos electrónicos
+init_mail(app)
 
 # Crear las tablas al iniciar la aplicación
 with app.app_context():
@@ -246,6 +260,13 @@ def registro():
         db.session.add(user)
         db.session.commit()
         
+        # Enviar correo de bienvenida
+        try:
+            send_welcome_email(user)
+        except Exception as e:
+            print(f"Error al enviar correo de bienvenida: {str(e)}")
+            # No fallamos el registro si el correo falla
+        
         flash('Usuario registrado exitosamente.', 'success')
         return redirect(url_for('admin'))
     
@@ -258,9 +279,15 @@ def recuperar_contrasena():
         user = Usuario.query.filter_by(email=email).first()
         
         if user:
-            # Aquí se implementaría la lógica para enviar el correo de recuperación
-            # Por ahora solo mostraremos un mensaje
-            flash('Si el correo existe en nuestra base de datos, recibirás instrucciones para recuperar tu contraseña.', 'info')
+            try:
+                # Enviar correo de recuperación de contraseña
+                if send_password_reset_email(user):
+                    flash('Se han enviado las instrucciones de recuperación a tu correo electrónico.', 'success')
+                else:
+                    flash('Error al enviar el correo. Por favor, contacta al administrador.', 'danger')
+            except Exception as e:
+                print(f"Error al enviar correo de recuperación: {str(e)}")
+                flash('Error al enviar el correo. Por favor, contacta al administrador.', 'danger')
         else:
             # Por seguridad, mostramos el mismo mensaje aunque el correo no exista
             flash('Si el correo existe en nuestra base de datos, recibirás instrucciones para recuperar tu contraseña.', 'info')
@@ -630,17 +657,28 @@ def nuevo_prestamo_interno(libro_id):
     if request.method == 'POST':
         try:
             miembro_id = request.form.get('miembro_id')
+            fecha_prestamo_str = request.form.get('fecha_prestamo')
+            fecha_devolucion_str = request.form.get('fecha_devolucion')
             
             if not miembro_id:
                 flash('Debe seleccionar un miembro', 'danger')
                 return redirect(request.url)
             
+            if not fecha_prestamo_str or not fecha_devolucion_str:
+                flash('Debe seleccionar las fechas de préstamo y devolución', 'danger')
+                return redirect(request.url)
+            
             miembro = Miembro.query.get_or_404(miembro_id)
             
-            # Crear nuevo préstamo interno usando el modelo PrestamoInterno
-            fecha_prestamo = datetime.utcnow()
-            fecha_devolucion = fecha_prestamo + timedelta(days=15)  # 15 días para internos
+            # Convertir las fechas del formulario
+            try:
+                fecha_prestamo = datetime.strptime(fecha_prestamo_str, '%Y-%m-%d')
+                fecha_devolucion = datetime.strptime(fecha_devolucion_str, '%Y-%m-%d')
+            except ValueError:
+                flash('Formato de fecha inválido', 'danger')
+                return redirect(request.url)
             
+            # Crear nuevo préstamo interno usando el modelo PrestamoInterno
             prestamo = PrestamoInterno(
                 miembro_id=miembro.id,
                 libro_id=libro.id,
