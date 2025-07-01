@@ -11,6 +11,7 @@ from io import BytesIO
 from sqlalchemy import or_
 import json
 import re
+# Configuración de correo electrónico
 from config.email_config import init_mail
 from utils.email_service import send_password_reset_email, send_welcome_email
 from dotenv import load_dotenv
@@ -26,9 +27,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configuración para URLs fuera de contexto de request
-app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME', 'localhost:5000')
+app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME', 'bibliotecafupagua.onrender.com')
 app.config['APPLICATION_ROOT'] = os.environ.get('APPLICATION_ROOT', '/')
-app.config['PREFERRED_URL_SCHEME'] = os.environ.get('PREFERRED_URL_SCHEME', 'http')
+app.config['PREFERRED_URL_SCHEME'] = os.environ.get('PREFERRED_URL_SCHEME', 'https')
 
 # Inicializar la base de datos
 db.init_app(app)
