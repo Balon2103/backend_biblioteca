@@ -1101,4 +1101,34 @@ body {
 .modal-header {
     z-index: 10003 !important;
     position: relative;
+}
+
+/* Estilos para campos de fecha */
+input[type="date"] {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input[type="date"]:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background-color: var(--primary-color);
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 3px;
+    filter: invert(1);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    background-color: var(--secondary-color);
 } 

@@ -31,37 +31,22 @@ ENV/
 *.swp
 *.swo
 
-# Database
-*.db
+# Database - Solo ignorar bases de datos locales de desarrollo
+instance/
+instance/biblioteca.db
 *.sqlite3
 
-# Permitir la base de datos principal
+# PERMITIR la base de datos principal del proyecto
 !biblioteca.db
-!instance/biblioteca.db
 
 # Logs
 *.log
 
-# Local development settings
+# Environment variables - CRÍTICO para seguridad
 .env
 .env.local
-
-# Pero NO ignorar estos archivos importantes
-!app/templates/
-!templates/
-!app/static/
-!static/
-!requirements.txt
-!run.py
-!app/__init__.py
-!app/models/
-!app/routes/
-!app/config/
-!app/utils/
-!app/controllers/
-
-# Environment variables
-.env
+.env.production
+.env.development
 
 # OS
 .DS_Store
@@ -70,11 +55,66 @@ Thumbs.db
 # Archivos temporales de Excel
 ~$*.xlsx
 
-# Archivos de datos (opcional, si no quieres versionarlos)
-Inventario Bibliografico.xlsx
+# Archivos de datos sensibles (opcional)
+# Inventario Bibliografico.xlsx
+# libros.json
 
-# Configuraciones locales o base de datos en instancia
--instance/
-!instance/
-!instance/biblioteca.db
-!instance/.keep
+# Archivos de configuración local
+config/local.py
+config/local_config.py
+
+# Archivos de prueba y scripts temporales
+test_*.py
+probar_*.py
+corregir_*.py
+verificar_*.py
+solucionar_*.py
+migrate_*.py
+actualizar_*.py
+recrear_*.py
+limpiar_*.py
+devolver_*.py
+forzar_*.py
+habilitar_*.py
+importar_*.py
+export_*.py
+buscar_*.py
+
+# Archivos de configuración de correo (contiene credenciales)
+config/email_config.py
+
+# Archivos de uploads (permitir estructura pero no contenido)
+static/uploads/*
+!static/uploads/.keep
+!static/uploads/biografia/
+!static/uploads/fotos/
+!static/uploads/portadas/
+
+# Archivos de configuración de servidor
+config/puma.rb
+config/database.yml
+
+# Archivos de documentación temporal
+*.md~
+*.txt~
+
+# Archivos de backup
+*.bak
+*.backup
+*~
+
+# Archivos de configuración de IDE específicos
+.vscode/settings.json
+.idea/workspace.xml
+
+# Archivos de caché del navegador
+static/css/*.css.map
+static/js/*.js.map
+
+# Archivos de dependencias locales
+node_modules/
+bower_components/
+
+# Archivos de configuración de deployment
+Procfile
+runtime.txt

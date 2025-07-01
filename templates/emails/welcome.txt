@@ -1,0 +1,35 @@
+Sistema Bibliotecario - ¡Bienvenido!
+====================================
+
+Hola {{ user.nombre }} {{ user.apellido }},
+
+¡Bienvenido al Sistema Bibliotecario! Tu cuenta ha sido creada exitosamente.
+
+Información de tu cuenta:
+- Usuario: {{ user.username }}
+- Rol: {{ user.rol.title() }}
+- Email: {{ user.email }}
+
+Ya puedes acceder al sistema y comenzar a utilizar todas las funcionalidades disponibles.
+
+Funcionalidades disponibles:
+- Consultar el catálogo de libros
+- Solicitar préstamos de libros
+- Ver tu historial de préstamos
+- Generar fichas bibliográficas
+{% if user.is_admin %}
+- Acceso al panel administrativo
+- Gestión de miembros
+- Ver estadísticas del sistema
+{% endif %}
+
+Para acceder al sistema, visita: {{ url_for('login', _external=True) }}
+
+Si tienes alguna pregunta o necesitas ayuda, no dudes en contactar al administrador del sistema.
+
+Saludos,
+Equipo del Sistema Bibliotecario
+
+---
+Este es un correo automático del Sistema Bibliotecario. 
+Por favor, no respondas a este mensaje. 

@@ -74,13 +74,15 @@
                                 <label class="form-label">
                                     <i class="fas fa-calendar me-1"></i>Fecha de préstamo
                                 </label>
-                                <input type="text" class="form-control" value="{{ fecha_prestamo.strftime('%d/%m/%Y') }}" readonly>
+                                <input type="date" name="fecha_prestamo" class="form-control" 
+                                       value="{{ fecha_prestamo.strftime('%Y-%m-%d') }}" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">
                                     <i class="fas fa-calendar-check me-1"></i>Fecha estimada de devolución
                                 </label>
-                                <input type="text" class="form-control" value="{{ fecha_devolucion.strftime('%d/%m/%Y') }}" readonly>
+                                <input type="date" name="fecha_devolucion" class="form-control" 
+                                       value="{{ fecha_devolucion.strftime('%Y-%m-%d') }}" required>
                             </div>
                             <div class="col-12 mb-3">
                                 <label class="form-label">

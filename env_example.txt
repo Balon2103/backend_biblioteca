@@ -1,0 +1,21 @@
+# Configuración del Sistema Bibliotecario
+# Copia este archivo como .env y configura tus valores
+
+# Clave secreta de la aplicación
+SECRET_KEY=tu_clave_secreta_muy_segura_aqui
+
+# Configuración de correo electrónico
+# Para Gmail, usa tu correo y contraseña de aplicación
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=True
+MAIL_USE_SSL=False
+MAIL_USERNAME=tu_correo@gmail.com
+MAIL_PASSWORD=tu_contraseña_de_aplicacion
+MAIL_DEFAULT_SENDER=tu_correo@gmail.com
+
+# Para desarrollo, puedes deshabilitar el envío de correos
+# MAIL_SUPPRESS_SEND=True
+
+# Configuración de la base de datos
+DATABASE_URL=sqlite:///biblioteca.db 
