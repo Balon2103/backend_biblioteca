@@ -80,8 +80,8 @@ importar_*.py
 export_*.py
 buscar_*.py
 
-# Archivos de configuración de correo (contiene credenciales)
-config/email_config.py
+# Archivos de configuración de correo (NO ignorar - necesario para Render)
+# config/email_config.py
 
 # Archivos de uploads (permitir estructura pero no contenido)
 static/uploads/*
