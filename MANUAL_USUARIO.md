@@ -3,13 +3,14 @@
 ## Índice
 1. [Introducción](#introducción)
 2. [Acceso al Sistema](#acceso-al-sistema)
-3. [Navegación Principal](#navegación-principal)
-4. [Catálogo de Libros](#catálogo-de-libros)
-5. [Sistema de Préstamos](#sistema-de-préstamos)
-6. [Panel de Administración](#panel-de-administración)
-7. [Gestión de Miembros](#gestión-de-miembros)
-8. [Estadísticas](#estadísticas)
-9. [Solución de Problemas](#solución-de-problemas)
+3. [Recuperación de Contraseña](#recuperación-de-contraseña)
+4. [Navegación Principal](#navegación-principal)
+5. [Catálogo de Libros](#catálogo-de-libros)
+6. [Sistema de Préstamos](#sistema-de-préstamos)
+7. [Panel de Administración](#panel-de-administración)
+8. [Gestión de Miembros](#gestión-de-miembros)
+9. [Estadísticas](#estadísticas)
+10. [Solución de Problemas](#solución-de-problemas)
 
 ---
 
@@ -24,13 +25,16 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
 - ✅ **Panel administrativo** completo
 - ✅ **Estadísticas** en tiempo real
 - ✅ **Gestión de portadas** de libros
+- ✅ **Recuperación de contraseña** por correo electrónico
+- ✅ **Acceso 24/7** al catálogo digital
 
 ---
 
 ## 2. Acceso al Sistema
 
 ### 2.1 Acceso Público
-- **URL**: `http://localhost:5000`
+- **URL Local**: `http://localhost:5000`
+- **URL Producción**: `https://bibliotecafupagua.onrender.com`
 - **Funcionalidades disponibles**:
   - Ver página de bienvenida
   - Explorar catálogo de libros
@@ -38,21 +42,48 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
   - Solicitar préstamos externos
 
 ### 2.2 Acceso Administrativo
-- **URL**: `http://localhost:5000/login`
+- **URL**: `/login`
 - **Credenciales por defecto**:
   - **Superadmin**: `superadmin` / `superadmin123`
   - **Admin**: `admin` / `admin123`
 
 ---
 
-## 3. Navegación Principal
+## 3. Recuperación de Contraseña
 
-### 3.1 Barra de Navegación
+### 3.1 Proceso de Recuperación
+Si olvidaste tu contraseña, puedes recuperarla siguiendo estos pasos:
+
+1. **Acceder a la página de login**
+2. **Hacer clic en "¿Olvidaste tu contraseña?"**
+3. **Ingresar tu correo electrónico** registrado en el sistema
+4. **Hacer clic en "Enviar instrucciones"**
+5. **Revisar tu correo electrónico** (también revisar carpeta de spam)
+6. **Hacer clic en el enlace** de recuperación en el correo
+7. **Ingresar nueva contraseña** (dos veces para confirmar)
+8. **Hacer clic en "Restablecer Contraseña"**
+
+### 3.2 Información del Correo de Recuperación
+El correo contiene:
+- **Asunto**: "Recuperación de Contraseña - Sistema Bibliotecario"
+- **Enlace seguro**: Para restablecer la contraseña
+- **Vigencia**: El enlace expira en 1 hora por seguridad
+
+### 3.3 Solución de Problemas
+- **No recibes el correo**: Revisar carpeta de spam
+- **Enlace expirado**: Solicitar nuevo correo de recuperación
+- **Error al restablecer**: Verificar que las contraseñas coincidan
+
+---
+
+## 4. Navegación Principal
+
+### 4.1 Barra de Navegación
 ```
 🏠 Inicio | 📚 Catálogo | 👤 Mi Perfil | 🔧 Administración | 🚪 Cerrar Sesión
 ```
 
-### 3.2 Menú de Administración (Solo para administradores)
+### 4.2 Menú de Administración (Solo para administradores)
 ```
 📚 Gestión de Libros
 👥 Gestión de Miembros  
@@ -62,9 +93,9 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
 
 ---
 
-## 4. Catálogo de Libros
+## 5. Catálogo de Libros
 
-### 4.1 Explorar el Catálogo
+### 5.1 Explorar el Catálogo
 1. **Acceder**: Clic en "Catálogo" en la barra de navegación
 2. **Vista**: Los libros se muestran en tarjetas con:
    - Portada del libro
@@ -72,12 +103,12 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
    - Información básica
    - Estado de disponibilidad
 
-### 4.2 Búsqueda y Filtros
+### 5.2 Búsqueda y Filtros
 - **Búsqueda por texto**: Busca en título, autor, editorial, COTA
 - **Filtro por categoría**: Selecciona materias específicas
 - **Paginación**: Navega entre páginas de resultados
 
-### 4.3 Ver Detalles de un Libro
+### 5.3 Ver Detalles de un Libro
 1. Clic en cualquier libro del catálogo
 2. **Información disponible**:
    - Título, autor, editorial
@@ -88,9 +119,9 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
 
 ---
 
-## 5. Sistema de Préstamos
+## 6. Sistema de Préstamos
 
-### 5.1 Tipos de Préstamo
+### 6.1 Tipos de Préstamo
 
 #### Préstamo Interno (Miembros)
 - **Requisitos**: Ser miembro registrado
@@ -110,7 +141,7 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
   3. Completar formulario de datos
   4. Confirmar préstamo
 
-### 5.2 Gestión de Préstamos
+### 6.2 Gestión de Préstamos
 
 #### Para Usuarios Regulares
 - **Ver mis préstamos**: Acceder a "Mi Perfil" → "Mis Préstamos"
@@ -123,9 +154,9 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
 
 ---
 
-## 6. Panel de Administración
+## 7. Panel de Administración
 
-### 6.1 Gestión de Libros
+### 7.1 Gestión de Libros
 
 #### Agregar Nuevo Libro
 1. **Acceder**: Administración → Gestión de Libros → "Agregar Nuevo Libro"
@@ -147,7 +178,7 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
 1. **Acceder**: Clic en "Eliminar" en cualquier libro
 2. **Confirmar**: Clic en "Eliminar" en el diálogo de confirmación
 
-### 6.2 Gestión de Miembros
+### 7.2 Gestión de Miembros
 
 #### Agregar Nuevo Miembro
 1. **Acceder**: Administración → Gestión de Miembros → "Agregar Nuevo Miembro"
@@ -165,7 +196,7 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
 - **Eliminar**: Clic en "Eliminar" (con confirmación)
 - **Ver carnet**: Clic en "Ver Carnet" o "Imprimir Carnet"
 
-### 6.3 Gestión de Préstamos
+### 7.3 Gestión de Préstamos
 
 #### Vista General
 - **Préstamos Activos**: Lista de libros prestados actualmente
@@ -179,9 +210,9 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
 
 ---
 
-## 7. Gestión de Miembros
+## 8. Gestión de Miembros
 
-### 7.1 Carnet Digital
+### 8.1 Carnet Digital
 - **Ver carnet**: Clic en "Ver Carnet" en cualquier miembro
 - **Imprimir carnet**: Clic en "Imprimir Carnet"
 - **Información incluida**:
@@ -190,80 +221,75 @@ El **Sistema Bibliotecario FUPAGUA** es una aplicación web desarrollada para ge
   - Número de carnet único
   - Fecha de registro
 
-### 7.2 Estados de Miembros
+### 8.2 Estados de Miembros
 - **Activo**: Miembro con acceso completo
 - **Inactivo**: Miembro suspendido temporalmente
 - **Suspendido**: Miembro con restricciones
 
 ---
 
-## 8. Estadísticas
+## 9. Estadísticas
 
-### 8.1 Acceso a Estadísticas
-- **Ruta**: Administración → Estadísticas
-- **Requisitos**: Permisos de administrador
+### 9.1 Estadísticas Generales
+- **Total de libros**: Cantidad total en el catálogo
+- **Libros disponibles**: Libros no prestados
+- **Libros prestados**: Libros actualmente en préstamo
+- **Total de miembros**: Miembros registrados
+- **Miembros activos**: Miembros con estado activo
 
-### 8.2 Información Disponible
-- **Resumen general**:
-  - Total de libros
-  - Total de miembros
-  - Préstamos activos
-  - Préstamos vencidos
+### 9.2 Estadísticas de Préstamos
+- **Préstamos activos**: Préstamos sin devolver
+- **Préstamos devueltos**: Historial de préstamos
+- **Préstamos vencidos**: Préstamos fuera de fecha
+- **Libros más prestados**: Top 5 libros populares
+- **Miembros más activos**: Top 5 miembros con más préstamos
 
-- **Gráficos**:
-  - Préstamos por período (mes/año)
-  - Libros por categorías
-  - Top libros más prestados
-
-- **Reportes**:
-  - Préstamos por tipo
-  - Actividad reciente
-  - Tendencias de uso
+### 9.3 Gráficos y Reportes
+- **Gráfico de préstamos por período**: Semana, mes, año
+- **Gráfico por categorías**: Préstamos por materia
+- **Tendencias**: Evolución de préstamos en el tiempo
 
 ---
 
-## 9. Solución de Problemas
+## 10. Solución de Problemas
 
-### 9.1 Problemas Comunes
+### 10.1 Problemas de Acceso
+- **Error 404**: Verificar URL correcta
+- **Error de login**: Verificar credenciales
+- **Sesión expirada**: Volver a iniciar sesión
 
-#### No puedo acceder al sistema
-- **Verificar**: URL correcta (`http://localhost:5000`)
-- **Verificar**: Servidor ejecutándose
-- **Solución**: Reiniciar el servidor
+### 10.2 Problemas de Préstamos
+- **Libro no disponible**: Verificar estado en catálogo
+- **Error al prestar**: Verificar datos del formulario
+- **Error al devolver**: Contactar administrador
 
-#### Error al subir portada
-- **Verificar**: Formato de imagen (JPG, PNG, GIF)
-- **Verificar**: Tamaño máximo (5MB)
-- **Verificar**: Caracteres especiales en título del libro
+### 10.3 Problemas de Correo
+- **No recibo correo de recuperación**: Revisar spam
+- **Enlace expirado**: Solicitar nuevo correo
+- **Error al restablecer**: Verificar contraseñas
 
-#### Libro no aparece como disponible
-- **Verificar**: Si hay préstamos activos
-- **Solución**: Revisar gestión de préstamos
-- **Solución**: Marcar como devuelto si es necesario
-
-#### Error de permisos
-- **Verificar**: Tipo de usuario (admin/superadmin)
-- **Verificar**: Sesión activa
-- **Solución**: Cerrar sesión y volver a iniciar
-
-### 9.2 Contacto de Soporte
-- **Email**: bibliotecajmd.fupagua@gmail.com
-- **Horario**: Horario laboral
-- **Ubicación**: Ver ubicación en página de bienvenida
+### 10.4 Contacto de Soporte
+- **Correo**: bibliotecajmd.fupagua@gmail.com
+- **Horario**: En horario laboral
+- **Respuesta**: 24-48 horas hábiles
 
 ---
 
-## 10. Consejos de Uso
+## 11. Información Adicional
 
-### 10.1 Para Usuarios
-- **Búsqueda eficiente**: Usa filtros por categoría
-- **Préstamos responsables**: Devuelve libros a tiempo
-- **Datos actualizados**: Mantén tu información de contacto actualizada
+### 11.1 Acerca de la Biblioteca
+La Biblioteca Juana Milano de Díaz es una biblioteca especializada que forma parte de la Fundación de Personas Autistas del Guárico (FUPAGUA). Lleva el nombre de Juana Josefa Milano Durán de Díaz, educadora y fundadora de la primera escuela en Puerto Ayacucho, Amazonas.
 
-### 10.2 Para Administradores
-- **Backup regular**: Respaldar base de datos periódicamente
-- **Mantenimiento**: Revisar préstamos vencidos regularmente
-- **Estadísticas**: Usar reportes para tomar decisiones informadas
+### 11.2 Horarios de Atención
+- **Acceso al catálogo**: 24/7 (en línea)
+- **Atención personalizada**: Horario laboral
+- **Consultas por correo**: bibliotecajmd.fupagua@gmail.com
+
+### 11.3 Políticas de Uso
+- **Duración de préstamos**: 15 días por defecto
+- **Renovación**: Consultar con administrador
+- **Multas**: Por retraso en devoluciones
+- **Responsabilidad**: Cuidado de libros prestados
 
 ---
 
