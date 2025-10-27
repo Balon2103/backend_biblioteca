@@ -27,7 +27,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configuración para URLs fuera de contexto de request
-app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME', 'bibliotecafupagua.onrender.com')
+# app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME', 'bibliotecafupagua.onrender.com')
 app.config['APPLICATION_ROOT'] = os.environ.get('APPLICATION_ROOT', '/')
 app.config['PREFERRED_URL_SCHEME'] = os.environ.get('PREFERRED_URL_SCHEME', 'https')
 
