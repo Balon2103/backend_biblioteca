@@ -118,3 +118,4 @@ bower_components/
 # Archivos de configuración de deployment
 Procfile
 runtime.txt
+.vercel
