@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for, flash, session, jsonify, send_file
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import pandas as pd
@@ -139,6 +139,9 @@ def formatear_valor(valor):
 @app.context_processor
 def utility_processor():
     return dict(formatear_valor=formatear_valor)
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(app.static_folder, 'favicon.ico')
 
 @app.route('/')
 def index():
