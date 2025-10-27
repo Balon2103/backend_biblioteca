@@ -18,9 +18,7 @@ from dotenv import load_dotenv
 
 # Cargar variables de entorno
 load_dotenv()
-@app.route("/")
-def index():
-    return "<h1>✅ Biblioteca Flask funcionando en el VPS</h1>"
+
 app = Flask(__name__, 
             template_folder='templates',
             static_folder='static')
