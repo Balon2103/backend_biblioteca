@@ -1,350 +1,437 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Sistema Bibliotecario{% endblock %}</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <!-- Animate.css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <!-- Custom CSS -->
-    <link href="{{ url_for('static', filename='css/style.css', v='999', t=range(1, 1000000) | random) }}" rel="stylesheet">
+    <link
+      href="{{ url_for('static', filename='css/style.css', v='999', t=range(1, 1000000) | random) }}"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .main-content {
-            flex: 1;
-        }
-        
-        .search-box {
-            max-width: 500px;
-            margin: 20px auto;
-        }
-        .pagination-container {
-            margin: 20px 0;
-        }
-        .book-card {
-            height: 100%;
-            transition: transform 0.2s;
-        }
-        .book-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .navbar-brand {
-            font-weight: bold;
-        }
-        .nav-link {
-            font-size: 1.1em;
-        }
-        .badge {
-            font-size: 0.9em;
-        }
-        .portada-clickeable {
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .portada-clickeable:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .portada-clickeable::after {
-            content: '🔍';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-        .portada-clickeable:hover::after {
-            opacity: 1;
-        }
-        .portada-container {
-            position: relative;
-        }
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .main-content {
+        flex: 1;
+      }
+
+      .search-box {
+        max-width: 500px;
+        margin: 20px auto;
+      }
+      .pagination-container {
+        margin: 20px 0;
+      }
+      .book-card {
+        height: 100%;
+        transition: transform 0.2s;
+      }
+      .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-brand {
+        font-weight: bold;
+      }
+      .nav-link {
+        font-size: 1.1em;
+      }
+      .badge {
+        font-size: 0.9em;
+      }
+      .portada-clickeable {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .portada-clickeable:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .portada-clickeable::after {
+        content: "🔍";
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+      .portada-clickeable:hover::after {
+        opacity: 1;
+      }
+      .portada-container {
+        position: relative;
+      }
     </style>
     {% block extra_css %}{% endblock %}
-</head>
-<body>
+  </head>
+  <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-book-open me-2"></i>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- Navegación principal -->
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="fas fa-home me-1"></i> Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('catalogo') }}">
-                            <i class="fas fa-book me-1"></i> Catálogo
-                        </a>
-                    </li>
-                </ul>
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+          <i class="fas fa-book-open me-2"></i>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <!-- Navegación principal -->
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('index') }}">
+                <i class="fas fa-home me-1"></i> Inicio
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('catalogo') }}">
+                <i class="fas fa-book me-1"></i> Catálogo
+              </a>
+            </li>
+          </ul>
 
-                <!-- Navegación de administración -->
-                {% if session.get('user_id') and (session.get('is_admin') or session.get('rol') == 'superadmin') %}
-                <ul class="navbar-nav me-3">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-cog me-1"></i> Administración
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('admin') }}">
-                                    <i class="fas fa-book me-2"></i> Gestión de Libros
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('miembros') }}">
-                                    <i class="fas fa-users me-2"></i> Gestión de Miembros
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('admin_prestamos') }}">
-                                    <i class="fas fa-list me-2"></i> Gestión de Préstamos
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('estadisticas') }}">
-                                    <i class="fas fa-chart-bar me-2"></i> Estadísticas
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                {% endif %}
+          <!-- Navegación de administración -->
+          {% if session.get('user_id') and (session.get('is_admin') or
+          session.get('rol') == 'superadmin') %}
+          <ul class="navbar-nav me-3">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="adminDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+              >
+                <i class="fas fa-cog me-1"></i> Administración
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('admin') }}">
+                    <i class="fas fa-book me-2"></i> Gestión de Libros
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('miembros') }}">
+                    <i class="fas fa-users me-2"></i> Gestión de Miembros
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('admin_prestamos') }}"
+                  >
+                    <i class="fas fa-list me-2"></i> Gestión de Préstamos
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('estadisticas') }}">
+                    <i class="fas fa-chart-bar me-2"></i> Estadísticas
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+          {% endif %}
 
-                <!-- Navegación de superadmin -->
-                {% if session.get('user_id') and session.get('rol') == 'superadmin' %}
-                <ul class="navbar-nav me-3">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="superadminDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-shield me-1"></i> Superadmin
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('registro') }}">
-                                    <i class="fas fa-user-plus me-2"></i> Registrar Usuario
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('gestion_usuarios') }}">
-                                    <i class="fas fa-users-cog me-2"></i> Gestión de Usuarios
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                {% endif %}
+          <!-- Navegación de superadmin -->
+          {% if session.get('user_id') and session.get('rol') == 'superadmin' %}
+          <ul class="navbar-nav me-3">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="superadminDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+              >
+                <i class="fas fa-user-shield me-1"></i> Superadmin
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('registro') }}">
+                    <i class="fas fa-user-plus me-2"></i> Registrar Usuario
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{{ url_for('gestion_usuarios') }}"
+                  >
+                    <i class="fas fa-users-cog me-2"></i> Gestión de Usuarios
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+          {% endif %}
 
-                <!-- Navegación de usuario -->
-                <ul class="navbar-nav">
-                    {% if session.get('user_id') %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}">
-                            <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">
-                            <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
+          <!-- Navegación de usuario -->
+          <ul class="navbar-nav">
+            {% if session.get('user_id') %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('logout') }}">
+                <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
+              </a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('login') }}">
+                <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
+              </a>
+            </li>
+            {% endif %}
+          </ul>
         </div>
+      </div>
     </nav>
 
     <div class="flash-messages">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show">
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+        ></button>
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
     </div>
 
     <div class="main-content">
-        <div class="container my-4">
-            {% block content %}{% endblock %}
-        </div>
+      <div class="container my-4">{% block content %}{% endblock %}</div>
     </div>
 
     <!-- Footer Brutal -->
     <footer class="footer-brutal">
-        <div class="footer-content">
-            <!-- Columna Izquierda -->
-            <div class="footer-section">
-                <div class="footer-brand">
-                    <i class="fas fa-book-open footer-icon"></i>
-                    <span class="footer-title">Sistema Bibliotecario</span>
-                </div>
-                <p class="footer-description">
-                    Gestionando el conocimiento, conectando mentes
-                </p>
-            </div>
-            
-            <!-- Columna Centro -->
-            <div class="footer-section">
-                <h5 class="footer-heading">Enlaces</h5>
-                <ul class="footer-links">
-                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i>Inicio</a></li>
-                    <li><a href="{{ url_for('catalogo') }}"><i class="fas fa-book"></i>Catálogo</a></li>
-                </ul>
-                
-                <h5 class="footer-heading" style="margin-top: 20px;">Síguenos</h5>
-                <div class="footer-social">
-                    <a href="#" class="social-btn facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-btn twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-btn instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-btn linkedin"><i class="fab fa-linkedin-in"></i></a>
-                </div>
-            </div>
-            
-            <!-- Columna Derecha -->
-            <div class="footer-section">
-                <h5 class="footer-heading">Contacto</h5>
-                <div class="footer-contact">
-                    <div class="footer-contact-item">
-                        <i class="fas fa-envelope"></i>
-                        <span>bibliotecajmd.fupagua@gmail.com</span>
-                    </div>
-                    <div class="footer-contact-item">
-                        <i class="fas fa-phone"></i>
-                        <span>+58 123-456-7890</span>
-                    </div>
-                    <div class="footer-contact-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Ciudad San Juan de los Morros</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="footer-copyright">
-                <div class="copyright-text">
-                    <span class="copyright-text-simple">Copyright © 2025 all rights reserved</span>
-                </div>
-            </div>
+      <div class="footer-content">
+        <!-- Columna Izquierda -->
+        <div class="footer-section">
+          <div class="footer-brand">
+            <i class="fas fa-book-open footer-icon"></i>
+            <span class="footer-title">Sistema Bibliotecario</span>
+          </div>
+          <p class="footer-description">
+            Gestionando el conocimiento, conectando mentes
+          </p>
         </div>
+
+        <!-- Columna Centro -->
+        <div class="footer-section">
+          <h5 class="footer-heading">Enlaces</h5>
+          <ul class="footer-links">
+            <li>
+              <a href="{{ url_for('index') }}"
+                ><i class="fas fa-home"></i>Inicio</a
+              >
+            </li>
+            <li>
+              <a href="{{ url_for('catalogo') }}"
+                ><i class="fas fa-book"></i>Catálogo</a
+              >
+            </li>
+          </ul>
+
+          <h5 class="footer-heading" style="margin-top: 20px">Síguenos</h5>
+          <div class="footer-social">
+            <a href="#" class="social-btn facebook"
+              ><i class="fab fa-facebook-f"></i
+            ></a>
+            <a href="#" class="social-btn twitter"
+              ><i class="fab fa-twitter"></i
+            ></a>
+            <a href="#" class="social-btn instagram"
+              ><i class="fab fa-instagram"></i
+            ></a>
+            <a href="#" class="social-btn linkedin"
+              ><i class="fab fa-linkedin-in"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- Columna Derecha -->
+        <div class="footer-section">
+          <h5 class="footer-heading">Contacto</h5>
+          <div class="footer-contact">
+            <div class="footer-contact-item">
+              <i class="fas fa-envelope"></i>
+              <span>bibliotecajmd.fupagua@gmail.com</span>
+            </div>
+            <div class="footer-contact-item">
+              <i class="fas fa-phone"></i>
+              <span>+58 123-456-7890</span>
+            </div>
+            <div class="footer-contact-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>Ciudad San Juan de los Morros</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-copyright">
+          <div class="copyright-text">
+            <span class="copyright-text-simple"
+              >Copyright © 2025 all rights reserved</span
+            >
+          </div>
+        </div>
+      </div>
     </footer>
 
     <!-- Modal para ver portadas en tamaño completo -->
-    <div class="modal fade" id="portadaModal" tabindex="-1" aria-labelledby="portadaModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="portadaModalLabel">Portada del Libro</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <img id="portadaModalImg" src="" alt="Portada del libro" class="img-fluid" style="max-height: 80vh;">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
+    <div
+      class="modal fade"
+      id="portadaModal"
+      tabindex="-1"
+      aria-labelledby="portadaModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="portadaModalLabel">
+              Portada del Libro
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body text-center">
+            <img
+              id="portadaModalImg"
+              src=""
+              alt="Portada del libro"
+              class="img-fluid"
+              style="max-height: 80vh"
+            />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js', v='1.3') }}"></script>
-    
+
     <!-- Función global para botones "Volver" -->
     <script>
-        // Función para manejar botones "Volver" de manera consistente
-        function volverAtras() {
-            if (document.referrer && document.referrer !== window.location.href) {
-                history.back();
-            } else {
-                // Si no hay página anterior, ir al inicio
-                window.location.href = "{{ url_for('index') }}";
-            }
+      // Función para manejar botones "Volver" de manera consistente
+      function volverAtras() {
+        if (document.referrer && document.referrer !== window.location.href) {
+          history.back();
+        } else {
+          // Si no hay página anterior, ir al inicio
+          window.location.href = "{{ url_for('index') }}";
         }
-        
-        // Auto-ocultar mensajes flash después de 5 segundos
-        document.addEventListener('DOMContentLoaded', function() {
-            const flashMessages = document.querySelectorAll('.flash-messages .alert');
-            flashMessages.forEach(function(message) {
-                setTimeout(function() {
-                    message.style.animation = 'fadeOut 0.5s ease-in forwards';
-                    setTimeout(function() {
-                        message.remove();
-                    }, 500);
-                }, 4500);
-            });
+      }
+
+      // Auto-ocultar mensajes flash después de 5 segundos
+      document.addEventListener("DOMContentLoaded", function () {
+        const flashMessages = document.querySelectorAll(
+          ".flash-messages .alert"
+        );
+        flashMessages.forEach(function (message) {
+          setTimeout(function () {
+            message.style.animation = "fadeOut 0.5s ease-in forwards";
+            setTimeout(function () {
+              message.remove();
+            }, 500);
+          }, 4500);
         });
-        
-        // Aplicar a todos los botones con clase 'btn-volver'
-        document.addEventListener('DOMContentLoaded', function() {
-            const botonesVolver = document.querySelectorAll('.btn-volver');
-            botonesVolver.forEach(function(boton) {
-                boton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    volverAtras();
-                });
-            });
+      });
+
+      // Aplicar a todos los botones con clase 'btn-volver'
+      document.addEventListener("DOMContentLoaded", function () {
+        const botonesVolver = document.querySelectorAll(".btn-volver");
+        botonesVolver.forEach(function (boton) {
+          boton.addEventListener("click", function (e) {
+            e.preventDefault();
+            volverAtras();
+          });
         });
+      });
     </script>
-    
+
     <!-- Script para modal de portadas -->
     <script>
-        // Función para abrir el modal de portadas
-        function abrirModalPortada(src, titulo) {
-            const modal = new bootstrap.Modal(document.getElementById('portadaModal'));
-            const modalImg = document.getElementById('portadaModalImg');
-            const modalTitle = document.getElementById('portadaModalLabel');
-            
-            modalImg.src = src;
-            modalTitle.textContent = 'Portada: ' + titulo;
-            modal.show();
-        }
-        
-        // Agregar evento click a todas las imágenes de portadas
-        document.addEventListener('DOMContentLoaded', function() {
-            const portadas = document.querySelectorAll('.portada-clickeable');
-            portadas.forEach(function(portada) {
-                portada.addEventListener('click', function() {
-                    const src = this.src;
-                    const titulo = this.getAttribute('data-titulo') || 'Libro';
-                    abrirModalPortada(src, titulo);
-                });
-            });
+      // Función para abrir el modal de portadas
+      function abrirModalPortada(src, titulo) {
+        const modal = new bootstrap.Modal(
+          document.getElementById("portadaModal")
+        );
+        const modalImg = document.getElementById("portadaModalImg");
+        const modalTitle = document.getElementById("portadaModalLabel");
+
+        modalImg.src = src;
+        modalTitle.textContent = "Portada: " + titulo;
+        modal.show();
+      }
+
+      // Agregar evento click a todas las imágenes de portadas
+      document.addEventListener("DOMContentLoaded", function () {
+        const portadas = document.querySelectorAll(".portada-clickeable");
+        portadas.forEach(function (portada) {
+          portada.addEventListener("click", function () {
+            const src = this.src;
+            const titulo = this.getAttribute("data-titulo") || "Libro";
+            abrirModalPortada(src, titulo);
+          });
         });
+      });
     </script>
-    
+
     {% block extra_js %}{% endblock %}
-</body>
-</html> 
+  </body>
+</html>
