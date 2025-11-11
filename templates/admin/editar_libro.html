@@ -1,146 +1,307 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('admin') }}">Panel de Administración</a></li>
-                    <li class="breadcrumb-item active">Editar Libro</li>
-                </ol>
-            </nav>
-        </div>
+  <div class="row">
+    <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{{ url_for('admin') }}">Panel de Administración</a>
+          </li>
+          <li class="breadcrumb-item active">Editar Libro</li>
+        </ol>
+      </nav>
     </div>
+  </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Editar Libro</h3>
-                </div>
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h4 class="mb-3">Información General</h4>
-                                <div class="mb-3">
-                                    <label for="titulo" class="form-label">Título</label>
-                                    <input type="text" class="form-control" id="titulo" name="titulo" value="{{ libro.titulo }}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="autor" class="form-label">Autor</label>
-                                    <input type="text" class="form-control" id="autor" name="autor" value="{{ libro.autor }}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="cota" class="form-label">COTA</label>
-                                    <input type="text" class="form-control" id="cota" name="cota" value="{{ libro.cota }}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editorial" class="form-label">Editorial</label>
-                                    <input type="text" class="form-control" id="editorial" name="editorial" value="{{ libro.editorial }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="anio_edicion" class="form-label">Año de edición</label>
-                                    <input type="text" class="form-control" id="anio_edicion" name="anio_edicion" value="{{ libro.anio_edicion }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="ciudad" class="form-label">Ciudad</label>
-                                    <input type="text" class="form-control" id="ciudad" name="ciudad" value="{{ libro.ciudad }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="coleccion" class="form-label">Colección</label>
-                                    <input type="text" class="form-control" id="coleccion" name="coleccion" value="{{ libro.coleccion }}">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h4 class="mb-3">Detalles Físicos</h4>
-                                <div class="mb-3">
-                                    <label for="medidas" class="form-label">Medidas</label>
-                                    <input type="text" class="form-control" id="medidas" name="medidas" value="{{ libro.medidas }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="num_paginas" class="form-label">Número de páginas</label>
-                                    <input type="text" class="form-control" id="num_paginas" name="num_paginas" value="{{ libro.num_paginas }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="caract_formato" class="form-label">Formato</label>
-                                    <input type="text" class="form-control" id="caract_formato" name="caract_formato" value="{{ libro.caract_formato }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="cant_ejemplares" class="form-label">Cantidad de ejemplares</label>
-                                    <input type="text" class="form-control" id="cant_ejemplares" name="cant_ejemplares" value="{{ libro.cant_ejemplares }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="tomos" class="form-label">Tomos</label>
-                                    <input type="text" class="form-control" id="tomos" name="tomos" value="{{ libro.tomos }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="verificacion" class="form-label">Verificación</label>
-                                    <input type="text" class="form-control" id="verificacion" name="verificacion" value="{{ libro.verificacion }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="materias" class="form-label">Materias</label>
-                                    <textarea class="form-control" id="materias" name="materias" rows="3">{{ libro.materias }}</textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="portada" class="form-label">Portada del Libro</label>
-                                    {% if libro.portada %}
-                                        <div class="mb-3">
-                                            <div class="portada-container d-inline-block position-relative">
-                                                <img src="{{ url_for('static', filename=libro.portada) }}" alt="Portada actual" class="img-thumbnail portada-clickeable" style="max-width: 200px; max-height: 200px; object-fit: cover;" data-titulo="{{ libro.titulo }}">
-                                            </div>
-                                            <p class="text-muted small mb-2">Portada actual (haz clic para ver en tamaño completo)</p>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="eliminar_portada" name="eliminar_portada">
-                                                <label class="form-check-label text-danger" for="eliminar_portada">
-                                                    <i class="fas fa-trash me-1"></i> Eliminar portada actual
-                                                </label>
-                                            </div>
-                                        </div>
-                                    {% endif %}
-                                    <input type="file" class="form-control" id="portada" name="portada" accept="image/*">
-                                    <small class="form-text text-muted">
-                                        {% if libro.portada %}
-                                            Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB. 
-                                            Sube una nueva imagen para reemplazar la portada actual o marca la casilla para eliminarla.
-                                        {% else %}
-                                            Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB.
-                                        {% endif %}
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-4">
-                            <div class="col-md-12">
-                                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                                <a href="{{ url_for('admin') }}" class="btn btn-secondary">Cancelar</a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">Editar Libro</h3>
         </div>
+        <div class="card-body">
+          <!-- IMPORTANTE: enctype habilita la carga de archivos -->
+          <form method="POST" enctype="multipart/form-data">
+            <div class="row">
+              <!-- Columna izquierda -->
+              <div class="col-md-6">
+                <h4 class="mb-3">Información General</h4>
+
+                <div class="mb-3">
+                  <label for="titulo" class="form-label">Título *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="titulo"
+                    name="titulo"
+                    value="{{ libro.titulo }}"
+                    required
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="autor" class="form-label">Autor *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="autor"
+                    name="autor"
+                    value="{{ libro.autor }}"
+                    required
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="cota" class="form-label">COTA *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="cota"
+                    name="cota"
+                    value="{{ libro.cota }}"
+                    required
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="editorial" class="form-label">Editorial</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editorial"
+                    name="editorial"
+                    value="{{ libro.editorial }}"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="anio_edicion" class="form-label"
+                    >Año de edición</label
+                  >
+                  <input
+                    type="number"
+                    min="1000"
+                    max="{{ current_year }}"
+                    class="form-control"
+                    id="anio_edicion"
+                    name="anio_edicion"
+                    value="{{ libro.anio_edicion }}"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="ciudad" class="form-label">Ciudad</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="ciudad"
+                    name="ciudad"
+                    value="{{ libro.ciudad }}"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="coleccion" class="form-label">Colección</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="coleccion"
+                    name="coleccion"
+                    value="{{ libro.coleccion }}"
+                  />
+                </div>
+              </div>
+
+              <!-- Columna derecha -->
+              <div class="col-md-6">
+                <h4 class="mb-3">Detalles Físicos</h4>
+
+                <div class="mb-3">
+                  <label for="medidas" class="form-label">Medidas</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="medidas"
+                    name="medidas"
+                    value="{{ libro.medidas }}"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="num_paginas" class="form-label"
+                    >Número de páginas</label
+                  >
+                  <input
+                    type="number"
+                    min="1"
+                    class="form-control"
+                    id="num_paginas"
+                    name="num_paginas"
+                    value="{{ libro.num_paginas }}"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="caract_formato" class="form-label">Formato</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="caract_formato"
+                    name="caract_formato"
+                    value="{{ libro.caract_formato }}"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="cant_ejemplares" class="form-label"
+                    >Cantidad de ejemplares</label
+                  >
+                  <input
+                    type="number"
+                    min="1"
+                    class="form-control"
+                    id="cant_ejemplares"
+                    name="cant_ejemplares"
+                    value="{{ libro.cant_ejemplares }}"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="tomos" class="form-label">Tomos</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="tomos"
+                    name="tomos"
+                    value="{{ libro.tomos }}"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="verificacion" class="form-label"
+                    >Verificación</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="verificacion"
+                    name="verificacion"
+                    value="{{ libro.verificacion }}"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="materias" class="form-label">Materias</label>
+                  <textarea
+                    class="form-control"
+                    id="materias"
+                    name="materias"
+                    rows="3"
+                  >
+{{ libro.materias }}</textarea
+                  >
+                </div>
+
+                <!-- Portada del libro -->
+                <div class="mb-3">
+                  <label for="portada" class="form-label"
+                    >Portada del Libro</label
+                  >
+                  {% if libro.portada %}
+                  <div class="mb-3">
+                    <div
+                      class="portada-container d-inline-block position-relative"
+                    >
+                      <img
+                        src="{{ url_for('static', filename=libro.portada) }}"
+                        alt="Portada actual"
+                        class="img-thumbnail portada-clickeable"
+                        style="
+                          max-width: 200px;
+                          max-height: 200px;
+                          object-fit: cover;
+                        "
+                        data-titulo="{{ libro.titulo }}"
+                      />
+                    </div>
+                    <p class="text-muted small mb-2">
+                      Portada actual (haz clic para ver en tamaño completo)
+                    </p>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="eliminar_portada"
+                        name="eliminar_portada"
+                      />
+                      <label
+                        class="form-check-label text-danger"
+                        for="eliminar_portada"
+                      >
+                        <i class="fas fa-trash me-1"></i> Eliminar portada
+                        actual
+                      </label>
+                    </div>
+                  </div>
+                  {% endif %}
+
+                  <!-- Input de subida con validación de tamaño -->
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="portada"
+                    name="portada"
+                    accept="image/*"
+                    onchange="if(this.files[0] && this.files[0].size > 5*1024*1024){ alert('La imagen no puede superar los 5 MB'); this.value=''; }"
+                  />
+
+                  <small class="form-text text-muted">
+                    {% if libro.portada %} Formatos permitidos: JPG, PNG, GIF.
+                    Tamaño máximo: 5 MB. Sube una nueva imagen para reemplazar
+                    la portada actual o marca la casilla para eliminarla. {%
+                    else %} Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5
+                    MB. {% endif %}
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="row mt-4">
+              <div class="col-md-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                  Guardar Cambios
+                </button>
+                <a href="{{ url_for('admin') }}" class="btn btn-secondary"
+                  >Cancelar</a
+                >
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
+<!-- Script para desactivar el input file si se marca eliminar -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const eliminarPortadaCheckbox = document.getElementById('eliminar_portada');
-    const portadaInput = document.getElementById('portada');
-    
+  document.addEventListener("DOMContentLoaded", function () {
+    const eliminarPortadaCheckbox = document.getElementById("eliminar_portada");
+    const portadaInput = document.getElementById("portada");
+
     if (eliminarPortadaCheckbox && portadaInput) {
-        eliminarPortadaCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                portadaInput.disabled = true;
-                portadaInput.value = '';
-                portadaInput.style.opacity = '0.5';
-            } else {
-                portadaInput.disabled = false;
-                portadaInput.style.opacity = '1';
-            }
-        });
+      eliminarPortadaCheckbox.addEventListener("change", function () {
+        if (this.checked) {
+          portadaInput.disabled = true;
+          portadaInput.value = "";
+          portadaInput.style.opacity = "0.5";
+        } else {
+          portadaInput.disabled = false;
+          portadaInput.style.opacity = "1";
+        }
+      });
     }
-});
+  });
 </script>
-{% endblock %} 
+{% endblock %}
