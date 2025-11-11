@@ -20,6 +20,8 @@ def create_app(config_name='default'):
     
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'tu_clave_secreta_aqui')
+ # ⚙️ Agregar límite máximo permitido (por ejemplo, 50 MB)
+    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB
 
     # Aplicar configuración adicional
     app.config.from_object(config[config_name])

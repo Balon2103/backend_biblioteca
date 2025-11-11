@@ -1,3 +1,4 @@
+from http.client import REQUEST_ENTITY_TOO_LARGE
 from flask import Flask, render_template, request, redirect, send_from_directory, url_for, flash, session, jsonify, send_file
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -25,12 +26,15 @@ app = Flask(__name__,
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'tu_clave_secreta_aqui')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB
 
 # Configuración para URLs fuera de contexto de request
 # app.config['SERVER_NAME'] = os.environ.get('SERVER_NAME', 'bibliotecafupagua.onrender.com')
 app.config['APPLICATION_ROOT'] = os.environ.get('APPLICATION_ROOT', '/')
 app.config['PREFERRED_URL_SCHEME'] = os.environ.get('PREFERRED_URL_SCHEME', 'https')
-
+@app.errorhandler(REQUEST_ENTITY_TOO_LARGE)
+def handle_large_file(e):
+    return jsonify(error="Archivo demasiado grande. Máximo permitido: 50 MB"), 413
 # Inicializar la base de datos
 db.init_app(app)
 
