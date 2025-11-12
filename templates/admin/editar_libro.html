@@ -204,63 +204,62 @@
 
                 <!-- Portada del libro -->
                 <div class="mb-3">
-                  <label for="portada" class="form-label"
-                    >Portada del Libro</label
-                  >
-                  {% if libro.portada %}
-                  <div class="mb-3">
-                    <div
-                      class="portada-container d-inline-block position-relative"
-                    >
+                  <label for="portadas" class="form-label">
+                    Portadas del Libro (máx. 5 imágenes)
+                  </label>
+
+                  {% if libro.portadas %}
+                  <div class="mb-3 d-flex flex-wrap gap-2">
+                    {% for imagen in libro.portadas %}
+                    <div class="position-relative d-inline-block text-center">
                       <img
-                        src="{{ url_for('static', filename=libro.portada) }}"
-                        alt="Portada actual"
+                        src="{{ url_for('static', filename=imagen) }}"
+                        alt="Portada {{ loop.index }}"
                         class="img-thumbnail portada-clickeable"
                         style="
-                          max-width: 200px;
-                          max-height: 200px;
+                          max-width: 150px;
+                          max-height: 150px;
                           object-fit: cover;
                         "
-                        data-titulo="{{ libro.titulo }}"
                       />
+                      <div class="form-check mt-1">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          name="eliminar_portadas"
+                          value="{{ imagen }}"
+                          id="elim_{{ loop.index }}"
+                        />
+                        <label
+                          class="form-check-label text-danger small"
+                          for="elim_{{ loop.index }}"
+                        >
+                          <i class="fas fa-trash me-1"></i>Eliminar
+                        </label>
+                      </div>
                     </div>
-                    <p class="text-muted small mb-2">
-                      Portada actual (haz clic para ver en tamaño completo)
-                    </p>
-                    <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="eliminar_portada"
-                        name="eliminar_portada"
-                      />
-                      <label
-                        class="form-check-label text-danger"
-                        for="eliminar_portada"
-                      >
-                        <i class="fas fa-trash me-1"></i> Eliminar portada
-                        actual
-                      </label>
-                    </div>
+                    {% endfor %}
                   </div>
+                  <p class="text-muted small">
+                    Marca las imágenes que desees eliminar o sube nuevas para
+                    reemplazarlas.
+                  </p>
                   {% endif %}
 
-                  <!-- Input de subida con validación de tamaño -->
+                  <!-- Input múltiple -->
                   <input
                     type="file"
                     class="form-control"
-                    id="portada"
-                    name="portada"
+                    id="portadas"
+                    name="portadas"
                     accept="image/*"
-                    onchange="if(this.files[0] && this.files[0].size > 5*1024*1024){ alert('La imagen no puede superar los 5 MB'); this.value=''; }"
+                    multiple
+                    onchange="validarImagenes(this)"
                   />
 
                   <small class="form-text text-muted">
-                    {% if libro.portada %} Formatos permitidos: JPG, PNG, GIF.
-                    Tamaño máximo: 5 MB. Sube una nueva imagen para reemplazar
-                    la portada actual o marca la casilla para eliminarla. {%
-                    else %} Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5
-                    MB. {% endif %}
+                    Puedes subir hasta 5 imágenes (JPG, PNG, GIF). Tamaño máximo
+                    por imagen: 5 MB.
                   </small>
                 </div>
               </div>
@@ -303,5 +302,24 @@
       });
     }
   });
+  function validarImagenes(input) {
+    const archivos = [...input.files];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxCount = 5;
+
+    if (archivos.length > maxCount) {
+      alert(`Solo puedes subir un máximo de ${maxCount} imágenes.`);
+      input.value = "";
+      return;
+    }
+
+    for (let file of archivos) {
+      if (file.size > maxSize) {
+        alert(`El archivo "${file.name}" supera los 5 MB.`);
+        input.value = "";
+        return;
+      }
+    }
+  }
 </script>
 {% endblock %}

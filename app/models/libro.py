@@ -19,10 +19,13 @@ class Libro(db.Model):
     verificacion = db.Column(db.String(50))
     materias = db.Column(db.String(200))
     disponible = db.Column(db.Boolean, default=True)
-    
-    # Relaciones usando strings para evitar importaciones circulares
+
+    # ✅ Nuevo campo para múltiples portadas (sin warning)
+    portadas = db.Column(db.JSON, default=list)
+
+    # Relaciones
     prestamos = db.relationship('Prestamo', backref='libro', lazy=True)
     prestamos_externos = db.relationship('PersonaPrestamo', backref='libro', lazy=True)
     
     def __repr__(self):
-        return f'<Libro {self.titulo}>' 
+        return f'<Libro {self.titulo}>'
