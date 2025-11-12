@@ -402,10 +402,8 @@ def nuevo_libro():
 @admin_required
 def editar_libro(id):
     libro = Libro.query.get_or_404(id)
-
     if request.method == 'POST':
         try:
-            # --- Actualizar campos normales ---
             libro.titulo = request.form.get('titulo')
             libro.autor = request.form.get('autor')
             libro.cota = request.form.get('cota')
@@ -420,52 +418,47 @@ def editar_libro(id):
             libro.tomos = request.form.get('tomos')
             libro.verificacion = request.form.get('verificacion')
             libro.materias = request.form.get('materias')
-
-            # Asegurar lista válida en base de datos
-            if not libro.portadas:
-                libro.portadas = []
-
-            # --- Manejo de subida múltiple de portadas ---
-            nuevas_portadas = request.files.getlist('portadas')  # input name="portadas"
-            upload_folder = os.path.join(app.static_folder, 'uploads', 'portadas')
-            os.makedirs(upload_folder, exist_ok=True)
-
-            for portada in nuevas_portadas:
+            
+            # Manejar nueva portada si se subió
+            if 'portada' in request.files:
+                portada = request.files['portada']
                 if portada and portada.filename != '':
-                    # Evitar exceso de 5 imágenes
-                    if len(libro.portadas) >= 5:
-                        flash('Solo se permiten hasta 5 imágenes por libro.', 'warning')
-                        break
-
-                    # Guardar archivo
+                    # Crear directorio para portadas si no existe
+                    upload_folder = os.path.join(app.static_folder, 'uploads', 'portadas')
+                    os.makedirs(upload_folder, exist_ok=True)
+                    
+                    # Eliminar portada anterior si existe
+                    if libro.portada:
+                        portada_anterior = os.path.join(app.static_folder, libro.portada)
+                        if os.path.exists(portada_anterior):
+                            os.remove(portada_anterior)
+                    
+                    # Guardar nueva portada
                     titulo_limpio = limpiar_nombre_archivo(libro.titulo)
                     filename = f"portada_{titulo_limpio}_{portada.filename}"
                     portada_path = os.path.join(upload_folder, filename)
                     portada.save(portada_path)
-
-                    # Agregar a la lista
-                    libro.portadas.append(f"uploads/portadas/{filename}")
-
-            # --- Manejo de eliminación ---
-            eliminar = request.form.getlist('eliminar_portadas')  # múltiples checkboxes
-            if eliminar:
-                for ruta_relativa in eliminar:
-                    portada_path = os.path.join(app.static_folder, ruta_relativa)
+                    libro.portada = f"uploads/portadas/{filename}"
+            
+            # Manejar eliminación de portada si se marca el checkbox
+            if request.form.get('eliminar_portada') == 'on':
+                if libro.portada:
+                    # Eliminar archivo físico
+                    portada_path = os.path.join(app.static_folder, libro.portada)
                     if os.path.exists(portada_path):
                         os.remove(portada_path)
-                    if ruta_relativa in libro.portadas:
-                        libro.portadas.remove(ruta_relativa)
-
+                    # Limpiar referencia en la base de datos
+                    libro.portada = None
+            
             db.session.commit()
             flash('Libro actualizado exitosamente', 'success')
             return redirect(url_for('admin'))
-
         except Exception as e:
             db.session.rollback()
             print(f"Error al actualizar libro: {str(e)}")
             flash('Error al actualizar el libro', 'danger')
-
     return render_template('admin/editar_libro.html', libro=libro)
+
 @app.route('/admin/libro/<int:id>/eliminar', methods=['POST'])
 @admin_required
 def eliminar_libro(id):
