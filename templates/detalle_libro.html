@@ -100,10 +100,10 @@
                             <a href="{{ url_for('catalogo', page=page, q=query, categoria=categoria, materia=materia_busqueda) }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-1"></i> Volver
                             </a>
-                            <a href="{{ url_for('ficha_bibliografica_pdf', id=libro.id) }}" class="btn btn-info" target="_blank">
+                            <a href="{{ url_for('ficha_bibliografica', id=libro.id) }}" class="btn btn-info" target="_blank">
                                 <i class="fas fa-print me-1"></i> Imprimir Ficha Normal
                             </a>
-                            <a href="{{ url_for('ficha_compacta', id=libro.id) }}" class="btn btn-info" target="_blank">
+                            <a href="{{ url_for('ficha_bibliografica_compacta', id=libro.id) }}" class="btn btn-info" target="_blank">
                                 <i class="fas fa-print me-1"></i> Imprimir Ficha Compacta
                             </a>
                             {% if libro.disponible and session.get('user_id') %}
