@@ -1,179 +1,164 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
     <title>Fichas Bibliográficas Múltiples</title>
     <style>
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 9px;
+        margin: 0;
+        padding: 10px;
+      }
+      .botones {
+        text-align: center;
+        margin: 20px 0;
+        padding: 10px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+      }
+      .btn {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 5px;
+        text-decoration: none;
+        border: 1px solid #007bff;
+        background: #007bff;
+        color: white;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      .btn:hover {
+        background: #0056b3;
+      }
+
+      .ficha {
+        border: 1px solid #000;
+        margin: 8px;
+        padding: 6px 8px;
+        width: calc(50% - 16px);
+        display: inline-block;
+        vertical-align: top;
+        page-break-inside: avoid;
+        max-width: 400px;
+      }
+      .titulo {
+        font-weight: bold;
+        font-size: 10px;
+        margin-bottom: 4px;
+        color: #222;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 4px;
+      }
+      td,
+      th {
+        padding: 1px 2px;
+        vertical-align: top;
+        border: none;
+      }
+      th {
+        text-align: left;
+        font-weight: bold;
+        width: 35%;
+      }
+      .materias {
+        border-top: 1px solid #ccc;
+        margin-top: 3px;
+        padding-top: 3px;
+      }
+
+      @media print {
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
-            font-size: 8px;
-            line-height: 1.2;
+          font-size: 8px;
         }
-        
         .ficha {
-            border: 1px solid #000;
-            padding: 6px;
-            margin-bottom: 10px;
-            page-break-inside: avoid;
-            max-width: 100%;
-            display: inline-block;
-            width: calc(50% - 10px);
-            margin-right: 10px;
-            vertical-align: top;
+          margin: 3px;
+          padding: 4px;
+          width: calc(50% - 8px);
         }
-        
         .titulo {
-            font-weight: bold;
-            font-size: 9px;
-            margin-bottom: 3px;
-            color: #000;
+          font-size: 9px;
         }
-        
-        .info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2px;
-        }
-        
-        .columna {
-            flex: 1;
-            min-width: 45%;
-        }
-        
-        .campo {
-            margin-bottom: 2px;
-        }
-        
-        .etiqueta {
-            font-weight: bold;
-            font-size: 7px;
-            color: #333;
-        }
-        
-        .valor {
-            font-size: 7px;
-        }
-        
-        .materias {
-            margin-top: 2px;
-            border-top: 1px solid #ccc;
-            padding-top: 2px;
-        }
-        
         .botones {
-            text-align: center;
-            margin: 20px 0;
-            padding: 10px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
+          display: none;
         }
-        
-        .btn {
-            display: inline-block;
-            padding: 8px 16px;
-            margin: 5px;
-            text-decoration: none;
-            border: 1px solid #007bff;
-            background: #007bff;
-            color: white;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .btn:hover {
-            background: #0056b3;
-        }
-        
-        @media print {
-            body {
-                font-size: 7px;
-            }
-            
-            .ficha {
-                margin-bottom: 8px;
-                padding: 5px;
-                width: calc(50% - 5px);
-                margin-right: 5px;
-            }
-            
-            .titulo {
-                font-size: 8px;
-            }
-            
-            .etiqueta, .valor {
-                font-size: 6px;
-            }
-            
-            .botones {
-                display: none;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+    <script>
+      // Imprimir automáticamente si se quiere desde el admin
+      window.onload = function () {
+        // Descomenta la siguiente línea si deseas imprimir automáticamente
+        // setTimeout(() => window.print(), 500);
+      };
+    </script>
+  </head>
+  <body>
     <div class="botones">
-        <a href="{{ url_for('admin') }}" class="btn">Volver al Admin</a>
-        <button onclick="window.print()" class="btn">Imprimir Fichas</button>
-        <span style="margin-left: 20px; font-size: 16px; font-weight: bold;">
-            Total de libros: {{ libros|length }}
-        </span>
+      <a href="{{ url_for('admin') }}" class="btn">Volver al Admin</a>
+      <button onclick="window.print()" class="btn">Imprimir Fichas</button>
+      <span style="margin-left: 20px; font-size: 16px; font-weight: bold">
+        Total de libros: {{ libros|length }}
+      </span>
     </div>
-    
+
     {% for libro in libros %}
     <div class="ficha">
-        <div class="titulo">{{ libro.titulo }}</div>
-        
-        <div class="info">
-            <div class="columna">
-                <div class="campo">
-                    <span class="etiqueta">A:</span> <span class="valor">{{ libro.autor }}</span>
-                </div>
-                <div class="campo">
-                    <span class="etiqueta">E:</span> <span class="valor">{{ libro.editorial }}</span>
-                </div>
-                <div class="campo">
-                    <span class="etiqueta">C:</span> <span class="valor">{{ libro.ciudad }}</span>
-                </div>
-                <div class="campo">
-                    <span class="etiqueta">Año:</span> <span class="valor">{{ libro.anio_edicion }}</span>
-                </div>
-                <div class="campo">
-                    <span class="etiqueta">Col:</span> <span class="valor">{{ libro.coleccion }}</span>
-                </div>
-                <div class="campo">
-                    <span class="etiqueta">Pág:</span> <span class="valor">{{ libro.num_paginas }}</span>
-                </div>
-            </div>
-            
-            <div class="columna">
-                <div class="campo">
-                    <span class="etiqueta">Med:</span> <span class="valor">{{ libro.medidas }}</span>
-                </div>
-                <div class="campo">
-                    <span class="etiqueta">Fmt:</span> <span class="valor">{{ libro.caract_formato }}</span>
-                </div>
-                <div class="campo">
-                    <span class="etiqueta">Ej:</span> <span class="valor">{{ libro.cant_ejemplares }}</span>
-                </div>
-                <div class="campo">
-                    <span class="etiqueta">T:</span> <span class="valor">{{ libro.tomos }}</span>
-                </div>
-                <div class="campo">
-                    <span class="etiqueta">Cota:</span> <span class="valor">{{ libro.cota }}</span>
-                </div>
-                <div class="campo">
-                    <span class="etiqueta">Ver:</span> <span class="valor">{{ libro.verificacion }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="materias">
-            <span class="etiqueta">Mat:</span> <span class="valor">{{ libro.materias }}</span>
-        </div>
+      <div class="titulo">{{ libro.titulo }}</div>
+      <table>
+        <tr>
+          <th>Autor:</th>
+          <td>{{ libro.autor }}</td>
+        </tr>
+        <tr>
+          <th>Editorial:</th>
+          <td>{{ libro.editorial }}</td>
+        </tr>
+        <tr>
+          <th>Ciudad:</th>
+          <td>{{ libro.ciudad }}</td>
+        </tr>
+        <tr>
+          <th>Año:</th>
+          <td>{{ libro.anio_edicion }}</td>
+        </tr>
+        <tr>
+          <th>Colección:</th>
+          <td>{{ libro.coleccion }}</td>
+        </tr>
+        <tr>
+          <th>Páginas:</th>
+          <td>{{ libro.num_paginas }}</td>
+        </tr>
+        <tr>
+          <th>Medidas:</th>
+          <td>{{ libro.medidas }}</td>
+        </tr>
+        <tr>
+          <th>Formato:</th>
+          <td>{{ libro.caract_formato }}</td>
+        </tr>
+        <tr>
+          <th>Ejemplares:</th>
+          <td>{{ libro.cant_ejemplares }}</td>
+        </tr>
+        <tr>
+          <th>Tomos:</th>
+          <td>{{ libro.tomos }}</td>
+        </tr>
+        <tr>
+          <th>Cota:</th>
+          <td>{{ libro.cota }}</td>
+        </tr>
+        <tr>
+          <th>Verificación:</th>
+          <td>{{ libro.verificacion }}</td>
+        </tr>
+      </table>
+      <div class="materias"><b>Materias:</b> {{ libro.materias }}</div>
     </div>
     {% endfor %}
-</body>
-</html> 
+  </body>
+</html>
